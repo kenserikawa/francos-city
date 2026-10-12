@@ -5,9 +5,9 @@ manoplas redondas y contorno negro de 1 px alrededor de cada pieza, de modo que 
 cuerpo quedan separados por una línea de tinta.
 
 Escribe src/assets/sprites/<clave>.png + .json (formato Aseprite con tags), que el juego carga igual
-que el arte exportado a mano. Con --preview guarda además una ampliación en la ruta indicada.
+que el arte exportado a mano. Con --preview guarda además una ampliación en art/generador/preview/.
 
-  python3 art/generador/personajes.py [--preview carpeta]
+  python3 art/generador/personajes.py [--preview]
 
 Cada pieza es una rejilla de letras (ver LEYENDA); '.' es transparente. Las piezas se contornean
 por separado y se apilan de atrás adelante. Los rasgos de la cara van encima, sin contorno.
@@ -21,6 +21,7 @@ from PIL import Image
 RAIZ = Path(__file__).resolve().parents[2]
 GPL = RAIZ / 'art/paleta/francos-city.gpl'
 SALIDA = RAIZ / 'src/assets/sprites'
+PREVIEW = Path(__file__).parent / 'preview'
 
 LEYENDA = {
     'k': 'tinta', 's': 'sombra', 'h': 'hormigon-oscuro', 'g': 'hormigon', 'i': 'piedra', 'j': 'arena-gris',
@@ -182,10 +183,10 @@ TORSO = Pieza([
     "..fffffff..",
     ".fffffffff.",
     "fffffffffff",
-    "ffUffffffff",
-    "FfUffffffff",
-    "ccUcccccccc",
-    "FfUffffffff",
+    "fffUfffffff",
+    "FffUfffffff",
+    "cccUccccccc",
+    "FffUfffffff",
     "FFfffffffff",
     "ZZZZZZZZZZZ",
 ])
@@ -233,18 +234,22 @@ MOCHILA = Pieza([
     "ooooooooooo",
 ])
 
-# Brazos: muñones como las piernas, con la punta en color piel. El del fondo va a la derecha del torso
-# y el cercano a la izquierda, por delante de la mochila.
-BRAZOS = {
-    'colgando': Pieza(["zzz", "zzz", "zzZ", "mmm"]),
-    'lanza': Pieza(["zzzm", "zzzm", "ZZZm"]),
-    'alto': Pieza(["..mm", ".zzm", "zzz.", "zz.."]),
-    'movil': Pieza(["mzz", "mzz", "mZZ"]),
+# Brazos: muñones como las piernas, con la punta en color piel. En 3/4 el cercano queda a la izquierda,
+# por delante del torso y de la mochila; el del fondo, a la derecha y detrás del torso, que lo tapa casi
+# entero: solo asoma su borde o lo que sobresale al estirarlo.
+BRAZO_FONDO = {
+    'colgando': Pieza(["ZZZ", "ZZZ", "ZZZ", "aaa"]),
+    'lanza': Pieza(["zzzzzm", "zzzzzm", "ZZZZZm"]),
+    'alto': Pieza(["...mm", "..zzm", ".zzz.", "zzz.."]),
 }
-BRAZOS_CERCA = {
+BRAZO_CERCA = {
     'colgando': Pieza(["zzz", "zzz", "Zzz", "mmm"]),
     'alto': Pieza(["mm..", "mzz.", ".zzz", "..zz"]),
+    'movil': Pieza(["zzzm", "zzzm", "ZZZm"]),
 }
+# Dónde se pega cada pose (x, y relativa al torso)
+SITIO_FONDO = {'colgando': (22, 3), 'lanza': (20, 3), 'alto': (21, 0)}
+SITIO_CERCA = {'colgando': (10, 3), 'alto': (7, 1), 'movil': (11, 4)}
 MOVIL = Pieza(["kkk", "kxk", "kek", "kkk"], contorno=False)
 MUNON = Pieza(["hhh", "hhh", "hhh", "sss"])     # piernas: dos muñones, como los de Brad en LISA
 
@@ -253,54 +258,47 @@ def cara(cejas='normal', ojos='normal', boca='normal'):
     return [CORREA, BARBA, NARIZ, CEJAS[cejas], OJOS[ojos], BOCA[boca]]
 
 
-def pablo(cuerpo_dy=0, cabeza_dy=0, piernas=((13, 0), (17, 0)), brazo='colgando', brazo_d=(0, 0),
+def pablo(cuerpo_dy=0, cabeza_dy=0, piernas=((13, 0), (17, 0)), fondo='colgando', fondo_d=(0, 0),
           cerca='colgando', cerca_d=(0, 0), mochila_dy=0, gesto=None):
-    """Monta un frame. piernas: (x, alzado) de cada muñón; brazo/cerca: pose y desplazamiento de cada brazo."""
+    """Monta un frame. piernas: (x, alzado) de cada muñón; fondo/cerca: pose y desplazamiento de cada brazo."""
     capas = []
     base = PABLO_H - 2                      # última fila de los muñones
     cy = base - 12 - cuerpo_dy              # arriba del torso
     hy = cy - 18 + cabeza_dy                # arriba de la cabeza
     capas.append((MOCHILA, 1, cy - 8 + mochila_dy))
+    fx, fy = SITIO_FONDO[fondo]
+    capas.append((BRAZO_FONDO[fondo], fx + fondo_d[0], cy + fy + fondo_d[1]))
     for x, alzado in piernas:               # trasera, luego delantera
         capas.append((MUNON, x, base - 3 - alzado))
     capas.append((TORSO, 11, cy))
     capas.append((CABEZA, 8, hy))
     capas += [(p, 8, hy) for p in cara(**(gesto or {}))]
     capas.append((CASCO, 7, hy - 2))
-    cx, cdy = cerca_d
-    if cerca == 'alto':
-        capas.append((BRAZOS_CERCA[cerca], 7 + cx, cy + 1 + cdy))
-    else:
-        capas.append((BRAZOS_CERCA[cerca], 9 + cx, cy + 3 + cdy))
-    bx, by = brazo_d
-    if brazo == 'movil':                    # muñón doblado delante del pecho con el móvil en la punta
-        capas.append((BRAZOS[brazo], 18 + bx, cy + 4 + by))
-        capas.append((MOVIL, 16 + bx, cy + 3 + by))
-    elif brazo == 'alto':
-        capas.append((BRAZOS[brazo], 21 + bx, cy + 1 + by))
-    else:
-        capas.append((BRAZOS[brazo], 20 + bx, cy + 3 + by))
+    cx, cdy = SITIO_CERCA[cerca]
+    capas.append((BRAZO_CERCA[cerca], cx + cerca_d[0], cy + cdy + cerca_d[1]))
+    if cerca == 'movil':                    # el móvil en la punta del muñón, delante del pecho
+        capas.append((MOVIL, cx + 3 + cerca_d[0], cy + cdy - 1 + cerca_d[1]))
     return componer(PABLO_W, PABLO_H, capas)
 
 
 def hoja_pablo():
     idle = [(pablo(), 700), (pablo(cabeza_dy=1, mochila_dy=1), 500)]
     run = [
-        (pablo(piernas=((12, 1), (18, 0)), brazo_d=(1, -1), cerca_d=(-1, 0), mochila_dy=1), 95),
+        (pablo(piernas=((12, 1), (18, 0)), fondo_d=(1, -1), cerca_d=(-1, 0), mochila_dy=1), 95),
         (pablo(cuerpo_dy=1, piernas=((13, 0), (17, 1))), 95),
-        (pablo(piernas=((12, 0), (18, 1)), brazo_d=(-1, 0), cerca_d=(1, -1), mochila_dy=1), 95),
+        (pablo(piernas=((12, 0), (18, 1)), fondo_d=(-1, 0), cerca_d=(1, -1), mochila_dy=1), 95),
         (pablo(cuerpo_dy=1, piernas=((13, 1), (17, 0))), 95),
     ]
-    movil = {'brazo': 'movil'}
+    movil = {'cerca': 'movil'}
     return [
         ('idle', idle),
         ('aburrido', [(pablo(**movil, gesto={'ojos': 'abajo'}), 500),
                       (pablo(**movil, gesto={'ojos': 'abajo', 'cejas': 'arriba'}), 250),
                       (pablo(**movil, cabeza_dy=1, gesto={'ojos': 'cerrados', 'boca': 'abierta'}), 900)]),
         ('run', run),
-        ('jump', [(pablo(cuerpo_dy=2, piernas=((13, 2), (17, 1)), brazo='alto', cerca='alto', gesto={'boca': 'abierta'}), 100)]),
-        ('throw', [(pablo(brazo='lanza', gesto={'cejas': 'enfado', 'boca': 'abierta'}), 220)]),
-        ('hurt', [(pablo(cabeza_dy=-1, brazo='alto', cerca='alto', gesto={'ojos': 'susto', 'cejas': 'arriba', 'boca': 'grito'}), 300)]),
+        ('jump', [(pablo(cuerpo_dy=2, piernas=((13, 2), (17, 1)), fondo='alto', cerca='alto', gesto={'boca': 'abierta'}), 100)]),
+        ('throw', [(pablo(fondo='lanza', gesto={'cejas': 'enfado', 'boca': 'abierta'}), 220)]),
+        ('hurt', [(pablo(cabeza_dy=-1, fondo='alto', cerca='alto', gesto={'ojos': 'susto', 'cejas': 'arriba', 'boca': 'grito'}), 300)]),
         ('talk', [(pablo(gesto={'boca': 'abierta'}), 160), (pablo(), 160)]),
     ]
 
@@ -366,11 +364,13 @@ M_CUERPO = Pieza([
     "ZZqRqqqRqqqRqq",
     "ZZZZZZZZZZZZZZ",
 ])
-M_BRAZOS = {
-    'colgando': Pieza(["qqq", "qqq", "qqZ", "mmm"]),
-    'gesto': Pieza(["qqqm", "qqqm", "ZZZm"]),
-    'senala': Pieza(["qqqqqm", "qqqqqm", "ZZZZZm"]),
+# Brazo del fondo: detrás de la bata, como el de Pablo (x, y relativa a la bata en M_SITIO_FONDO)
+M_BRAZO_FONDO = {
+    'colgando': Pieza(["ZZZ", "ZZZ", "ZZZ", "aaa"]),
+    'gesto': Pieza(["qqqqqm", "qqqqqm", "ZZZZZm"]),
+    'senala': Pieza(["qqqqqqqm", "qqqqqqqm", "ZZZZZZZm"]),
 }
+M_SITIO_FONDO = {'colgando': (24, 2), 'gesto': (22, 3), 'senala': (22, 2)}
 # Brazo cercano: muñón que sale del costado izquierdo y se apoya en el asa del carrito
 M_BRAZO_CERCA = Pieza(["mqqq", "mqqq", "mqqZ"])
 M_MUNON = Pieza(["uuu", "uuu", "ZZZ", "ZZw"])   # muñón con media y zapatilla de estar por casa
@@ -393,6 +393,8 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     cy = base - 3 - 10 + 1                  # arriba de la bata
     hy = cy - 16 + cabeza_dy
     capas = [(ASA, 7, cy + 2), (CARRITO, 0, cy + 4), (RUEDA, 1, base - 1), (RUEDA, 5, base - 1)]
+    fx, fy = M_SITIO_FONDO[brazo]
+    capas.append((M_BRAZO_FONDO[brazo], fx, cy + fy))
     for x in (13, 17):
         capas.append((M_MUNON, x, base - 2))
     capas.append((M_CUERPO, 10, cy))
@@ -403,12 +405,6 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     capas += [(p, 8, hy) for p in (M_NARIZ, M_GAFAS, M_OJOS[ojos], M_BOCA[boca])]
     capas.append((M_PENDIENTE, 10, hy + 13))
     capas.append((M_BRAZO_CERCA, 7, cy + 2))
-    if brazo == 'senala':
-        capas.append((M_BRAZOS[brazo], 21, cy + 2))
-    elif brazo == 'gesto':
-        capas.append((M_BRAZOS[brazo], 21, cy + 3))
-    else:
-        capas.append((M_BRAZOS[brazo], 21, cy + 2))
     return componer(MARUJA_W, MARUJA_H, capas)
 
 
@@ -423,24 +419,26 @@ def hoja_maruja():
 # ---------------------------------------------------------------------------------------------
 
 
-def ampliar(hoja, ruta, escala=8, fondo=(200, 32, 32, 255)):
-    bg = Image.new('RGBA', hoja.size, fondo)
-    bg.alpha_composite(hoja)
-    bg.resize((hoja.width * escala, hoja.height * escala), Image.NEAREST).save(ruta)
+def ampliar(hoja, fw, ruta, escala=8, fondo=(200, 32, 32, 255)):
+    """Todos los frames separados por 2 px sobre el rojo de la referencia, ampliados."""
+    n = hoja.width // fw
+    tira = Image.new('RGBA', (n * (fw + 2), hoja.height + 2), fondo)
+    for i in range(n):
+        tira.alpha_composite(hoja.crop((i * fw, 0, (i + 1) * fw, hoja.height)), (i * (fw + 2) + 1, 1))
+    tira.resize((tira.width * escala, tira.height * escala), Image.NEAREST).save(ruta)
 
 
 def main():
-    preview = None
-    if '--preview' in sys.argv:
-        preview = Path(sys.argv[sys.argv.index('--preview') + 1])
+    preview = '--preview' in sys.argv
     hojas = {
-        'pablo': exportar('pablo', PABLO_W, PABLO_H, hoja_pablo()),
-        'maruja': exportar('maruja', MARUJA_W, MARUJA_H, hoja_maruja()),
+        'pablo': (exportar('pablo', PABLO_W, PABLO_H, hoja_pablo()), PABLO_W),
+        'maruja': (exportar('maruja', MARUJA_W, MARUJA_H, hoja_maruja()), MARUJA_W),
     }
-    for clave, hoja in hojas.items():
+    for clave, (hoja, fw) in hojas.items():
         print(f'{clave}: {hoja.width}x{hoja.height}')
         if preview:
-            ampliar(hoja, preview / f'{clave}.png')
+            PREVIEW.mkdir(exist_ok=True)
+            ampliar(hoja, fw, PREVIEW / f'{clave}.png')
 
 
 if __name__ == '__main__':
