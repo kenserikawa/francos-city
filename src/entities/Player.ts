@@ -78,7 +78,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.throwingUntil = time + 220;
       this.play(animKey(this.scene, 'pablo', 'throw'));
       // El paquete sale en el frame en que el brazo se estira
-      this.scene.time.delayedCall(40, () => this.emit('throw', this.x + this.facing * 12, this.y - 13, this.facing));
+      this.scene.time.delayedCall(40, () => this.emit('throw', this.x + this.facing * 12, this.y - 11, this.facing));
     }
 
     // Polvo al correr

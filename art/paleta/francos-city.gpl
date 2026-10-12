@@ -2,7 +2,7 @@ GIMP Palette
 Name: Francos City
 Columns: 8
 #
-# Paleta oficial de Francos City: 32 colores en 4 rampas.
+# Paleta oficial de Francos City: 4 rampas de 8 colores y el fosforito del chaleco de Pablo.
 # El juego la lee de este fichero: si cambias un color aquí, cambia también el arte procedural.
 # Los nombres (columna de la derecha) los usa el código; no los borres ni los renombres.
  26  20  24	tinta
@@ -37,3 +37,5 @@ Columns: 8
 188 207 210	celeste-sucio
  61 143 134	turquesa
 208  98 143	rosa-influencer
+218 238  62	fosforito
+156 178  44	fosforito-oscuro

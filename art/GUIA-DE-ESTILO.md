@@ -20,12 +20,13 @@ y composición de escena. La sensación de acción (golpes, polvo, temblores) la
 
 ## Paleta
 
-`art/paleta/francos-city.gpl`: 32 colores en 4 rampas (neutros/hormigón, cálidos, ocres/olivas, azules).
+`art/paleta/francos-city.gpl`: 4 rampas de 8 colores (neutros/hormigón, cálidos, ocres/olivas, azules)
+más `fosforito` y `fosforito-oscuro`, reservados para el chaleco reflectante de Pablo.
 
 - **Cargarla en Aseprite:** en el panel de paleta, menú ☰ → *Load Palette* → elige el `.gpl`.
 - Usa solo esos colores. El juego lee este mismo fichero: si retocas un color, cambia también el arte procedural.
 - No renombres ni borres colores; el código los busca por nombre.
-- Colores con intención: `butano` es la mochila de Pablo; `turquesa` es la marca del Plan de Autenticidad;
+- Colores con intención: `amarillo` es la mochila de Pablo y `fosforito`, su chaleco; `turquesa` es la marca del Plan de Autenticidad;
   `rosa-influencer`, el mundo de los Espectadores.
 
 ## Cómo entra tu arte en el juego

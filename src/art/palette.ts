@@ -6,6 +6,7 @@ export const COLOR_NAMES = [
   'vino', 'ladrillo', 'terracota-oscura', 'terracota', 'albaricoque', 'melocoton', 'alarma', 'amarillo',
   'tierra', 'cuero', 'ocre', 'mostaza', 'trigo', 'oliva-oscuro', 'oliva', 'olivo-claro',
   'noche', 'pizarra', 'azulejo-oscuro', 'azulejo', 'cielo-polvo', 'celeste-sucio', 'turquesa', 'rosa-influencer',
+  'fosforito', 'fosforito-oscuro',
 ] as const;
 
 export type ColorName = (typeof COLOR_NAMES)[number];

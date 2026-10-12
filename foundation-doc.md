@@ -316,7 +316,7 @@ Pablo descubre que no puede volver al barrio que recordaba. Puede elegir una fac
 
 - **Listón visual: *LISA*.** Arte expresivo con pocos frames; la sensación *Metal Slug* sale de los efectos (hit-stop, temblor, partículas), no de animar más.
 - **Pixel art 2D**, resolución base **320x180**, escalado entero (×4 = 720p, ×6 = 1080p). Personajes de ~40 px.
-- Paleta cerrada de 32 colores: `art/paleta/francos-city.gpl`. Guía práctica en `art/GUIA-DE-ESTILO.md`.
+- Paleta cerrada de 34 colores (32 en rampas y el fosforito del chaleco): `art/paleta/francos-city.gpl`. Guía práctica en `art/GUIA-DE-ESTILO.md`.
 - Paleta cálida y sucia: ocres, terracotas, verdes oliva, azules polvorientos, grises de hormigón.
 - Arquitectura en capas: Al-Andalus contemporáneo, brutalismo, herreriano, barroco y neoclásico en ruinas.
 - Personajes diversos y estilizados; evitar rasgos étnicos como chiste o código moral.
