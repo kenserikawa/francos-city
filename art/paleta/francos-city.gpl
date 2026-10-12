@@ -1,0 +1,39 @@
+GIMP Palette
+Name: Francos City
+Columns: 8
+#
+# Paleta oficial de Francos City: 32 colores en 4 rampas.
+# El juego la lee de este fichero: si cambias un color aquí, cambia también el arte procedural.
+# Los nombres (columna de la derecha) los usa el código; no los borres ni los renombres.
+ 26  20  24	tinta
+ 45  37  40	sombra
+ 75  68  71	hormigon-oscuro
+111 104 102	hormigon
+150 141 133	piedra
+188 178 165	arena-gris
+227 218 200	cal
+246 240 224	papel
+ 76  31  34	vino
+123  53  41	ladrillo
+166  80  58	terracota-oscura
+201 116  74	terracota
+225 158 108	albaricoque
+242 201 160	melocoton
+216  67  47	alarma
+240 138  44	butano
+ 62  44  28	tierra
+107  74  44	cuero
+167 120  58	ocre
+210 165  76	mostaza
+236 210 138	trigo
+ 58  65  38	oliva-oscuro
+ 95 107  56	oliva
+143 154  88	olivo-claro
+ 22  28  43	noche
+ 37  54  80	pizarra
+ 47  84 118	azulejo-oscuro
+ 79 127 163	azulejo
+134 168 189	cielo-polvo
+188 207 210	celeste-sucio
+ 61 143 134	turquesa
+208  98 143	rosa-influencer
