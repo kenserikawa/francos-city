@@ -6,6 +6,7 @@ Diseño y decisiones: `foundation-doc.md` (sección 20). Hitos: sección 19.
 ## Comandos
 
 - `npm run dev` (puerto 5173; resérvalo con `ccres`), `npm run typecheck`, `npm run build`.
+- Deploy: `.github/workflows/pages.yml` compila y publica `dist/` en GitHub Pages en cada push a `main`.
 - `?calle` salta la portada; `?debug` activa el debug de Arcade. En dev, `window.game` es la instancia.
 
 ## Convenciones
@@ -17,6 +18,8 @@ Diseño y decisiones: `foundation-doc.md` (sección 20). Hitos: sección 19.
 - Sprites: el arte hecho a mano (`src/assets/sprites/<clave>.png|json`, exportado de Aseprite con tags) tiene
   prioridad; si no existe, `buildPlaceholders` genera uno procedural con la misma clave.
   Animaciones como `<clave>:<tag>`; resolver siempre con `animKey()` (aplica los fallbacks).
-- El usuario dibuja Pablo, Doña Maruja y el Bar Manolo; no sustituir su arte por arte generado.
+- El usuario diseña Pablo, Doña Maruja y el Bar Manolo; no sustituir su arte por arte generado.
+  Los `pablo` y `maruja` actuales de `src/assets/sprites` son provisionales, generados con Stitch
+  (colores ajustados a la paleta); el arte del usuario los reemplaza exportando con la misma clave.
 - Textos del juego y comentarios en español.
 - Git: el remoto es la cuenta personal (`git@github.com:kenserikawa/...`); la identidad la pone `includeIf`.

@@ -1,0 +1,122 @@
+{
+ "frames": [
+  {
+   "filename": "idle 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 30,
+    "h": 36
+   },
+   "duration": 700
+  },
+  {
+   "filename": "talk 1",
+   "frame": {
+    "x": 30,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 30,
+    "h": 36
+   },
+   "duration": 180
+  },
+  {
+   "filename": "talk 2",
+   "frame": {
+    "x": 60,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 30,
+    "h": 36
+   },
+   "duration": 180
+  },
+  {
+   "filename": "senala 3",
+   "frame": {
+    "x": 90,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 30,
+    "h": 36
+   },
+   "duration": 600
+  }
+ ],
+ "meta": {
+  "app": "stitch \u2192 pack_aseprite.py",
+  "image": "maruja.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 120,
+   "h": 36
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "idle",
+    "from": 0,
+    "to": 0,
+    "direction": "forward"
+   },
+   {
+    "name": "talk",
+    "from": 1,
+    "to": 2,
+    "direction": "forward"
+   },
+   {
+    "name": "senala",
+    "from": 3,
+    "to": 3,
+    "direction": "forward"
+   }
+  ]
+ }
+}

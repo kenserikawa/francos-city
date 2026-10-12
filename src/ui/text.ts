@@ -20,17 +20,19 @@ export function label(scene: Phaser.Scene, x: number, y: number, text: string, c
   const scale = opts.scale ?? 1;
   const [ox, oy] = opts.origin ?? [0, 0];
   const make = (dx: number, dy: number, c: Tint) => {
-    const t = scene.add.bitmapText(dx, dy, FONT_KEY, text).setScale(scale).setOrigin(ox, oy).setTint(tint(c));
+    const t = scene.add.bitmapText(0, 0, FONT_KEY, text).setScale(scale).setTint(tint(c));
     if (opts.maxWidth) t.setMaxWidth(opts.maxWidth);
     if (opts.align === 1) t.setCenterAlign();
     else if (opts.align === 2) t.setRightAlign();
+    // Origen a mano y en píxeles enteros: con medio píxel, el escalado se come columnas de los glifos
+    t.setPosition(dx - Math.round(t.width * ox), dy - Math.round(t.height * oy));
     return t;
   };
   const parts: Phaser.GameObjects.BitmapText[] = [];
   const shadow = opts.shadow === undefined ? 'tinta' : opts.shadow;
   if (shadow !== null) parts.push(make(scale, scale, shadow));
   parts.push(make(0, 0, color));
-  const c = scene.add.container(x, y, parts);
+  const c = scene.add.container(Math.round(x), Math.round(y), parts);
   if (opts.depth !== undefined) c.setDepth(opts.depth);
   if (opts.scroll !== undefined) c.setScrollFactor(opts.scroll);
   return c;

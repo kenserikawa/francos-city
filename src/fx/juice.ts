@@ -1,11 +1,17 @@
 import Phaser from 'phaser';
 import { PAL } from '../art/palette';
-import { FONT_KEY } from '../art/font';
+import { label } from '../ui/text';
 
 /*
  * La sensación "Metal Slug" sale de aquí, no de los frames: congelar el impacto, sacudir la cámara,
  * soltar polvo y papelotes.
  */
+
+/** Redondea la posición: en pixel art, medio píxel deforma el dibujo al escalar. */
+export function snap(obj: { x: number; y: number }) {
+  obj.x = Math.round(obj.x);
+  obj.y = Math.round(obj.y);
+}
 
 /** Congela física y animaciones unos milisegundos para que el golpe se sienta. */
 export function hitStop(scene: Phaser.Scene, ms: number) {
@@ -63,11 +69,9 @@ export function createFx(scene: Phaser.Scene, depth: number): Fx {
 
 /** Texto que sube y se apaga parpadeando ("-1 autenticidad"). Sin transparencias: se verían turbias. */
 export function floatText(scene: Phaser.Scene, x: number, y: number, text: string, color: number, depth: number) {
-  const shadow = scene.add.bitmapText(x + 1, y + 1, FONT_KEY, text).setOrigin(0.5, 1).setTint(PAL.tinta).setDepth(depth);
-  const label = scene.add.bitmapText(x, y, FONT_KEY, text).setOrigin(0.5, 1).setTint(color).setDepth(depth);
-  const parts = [shadow, label];
-  scene.tweens.add({ targets: parts, y: '-=16', duration: 700, ease: 'Cubic.easeOut' });
-  blinkOut(scene, parts, 700);
+  const c = label(scene, x, y, text, color, { origin: [0.5, 1], depth });
+  scene.tweens.add({ targets: c, y: c.y - 16, duration: 700, ease: 'Cubic.easeOut', onUpdate: () => snap(c) });
+  blinkOut(scene, [c], 700);
 }
 
 /** Parpadeo y desaparición, a la manera de los 16 bits. */

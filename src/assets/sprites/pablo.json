@@ -1,0 +1,344 @@
+{
+ "frames": [
+  {
+   "filename": "idle 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 600
+  },
+  {
+   "filename": "aburrido 1",
+   "frame": {
+    "x": 24,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 500
+  },
+  {
+   "filename": "aburrido 2",
+   "frame": {
+    "x": 48,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 250
+  },
+  {
+   "filename": "aburrido 3",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 900
+  },
+  {
+   "filename": "run 4",
+   "frame": {
+    "x": 96,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 95
+  },
+  {
+   "filename": "run 5",
+   "frame": {
+    "x": 120,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 95
+  },
+  {
+   "filename": "run 6",
+   "frame": {
+    "x": 144,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 95
+  },
+  {
+   "filename": "run 7",
+   "frame": {
+    "x": 168,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 95
+  },
+  {
+   "filename": "jump 8",
+   "frame": {
+    "x": 192,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 120
+  },
+  {
+   "filename": "throw 9",
+   "frame": {
+    "x": 216,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 140
+  },
+  {
+   "filename": "hurt 10",
+   "frame": {
+    "x": 240,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 300
+  },
+  {
+   "filename": "talk 11",
+   "frame": {
+    "x": 264,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 160
+  },
+  {
+   "filename": "talk 12",
+   "frame": {
+    "x": 288,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 36
+   },
+   "duration": 160
+  }
+ ],
+ "meta": {
+  "app": "stitch \u2192 pack_aseprite.py",
+  "image": "pablo.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 312,
+   "h": 36
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "idle",
+    "from": 0,
+    "to": 0,
+    "direction": "forward"
+   },
+   {
+    "name": "aburrido",
+    "from": 1,
+    "to": 3,
+    "direction": "forward"
+   },
+   {
+    "name": "run",
+    "from": 4,
+    "to": 7,
+    "direction": "forward"
+   },
+   {
+    "name": "jump",
+    "from": 8,
+    "to": 8,
+    "direction": "forward"
+   },
+   {
+    "name": "throw",
+    "from": 9,
+    "to": 9,
+    "direction": "forward"
+   },
+   {
+    "name": "hurt",
+    "from": 10,
+    "to": 10,
+    "direction": "forward"
+   },
+   {
+    "name": "talk",
+    "from": 11,
+    "to": 12,
+    "direction": "forward"
+   }
+  ]
+ }
+}

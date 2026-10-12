@@ -1,268 +1,556 @@
 import Phaser from 'phaser';
-import { Pixels, rng } from './pixels';
+import { Pixels, rng, type Color } from './pixels';
 import { buildSheet, buildTexture, type FrameSpec } from './sprites';
 import { drawText, measureText, CAP_TOP } from './font';
 
 /*
- * Placeholders procedurales. Sirven para jugar y para fijar proporciones, no son el arte final:
- * en cuanto exista src/assets/sprites/<clave>.png, el juego usa ese y se olvida de estos.
+ * Placeholders procedurales con la dirección de arte del juego: piezas con contorno negro propio,
+ * cabezas grandes, gestos raros. Sirven de referencia para el arte a mano y se sustituyen solos
+ * en cuanto existe src/assets/sprites/<clave>.png.
  */
 
 type Pt = [number, number];
+const FRAME = 48;
 
-interface PabloPose {
+// ---------------------------------------------------------------- caras (filas de caracteres)
+
+const FACE_MAP: Record<string, Color> = {
+  s: 'terracota', S: 'terracota-oscura', l: 'albaricoque', w: 'papel', K: 'tinta', v: 'vino', g: 'celeste-sucio',
+};
+
+type Mouth = 'smirk' | 'open' | 'flat';
+type Eyes = 'open' | 'blink' | 'down' | 'squint';
+
+/** Cara de Pablo de 3/4 (15×12): ceja escéptica, ojeras, nariz de bulbo, barba de tres días. */
+function face3q(eyes: Eyes, mouth: Mouth): string[] {
+  const rows = [
+    '..ssssssssss...',
+    '.ssssssssKKKs..',
+    '.sKKKssssssss..',
+    '.swwKsssswKss..',
+    '.ssSSssssSSss..',
+    '.sssssssssslSs.',
+    '.sssssssssslsss',
+    '.ssssssssssSSs.',
+    '.SssssssssKs...',
+    '.SssssKKKKss...',
+    '..SsSsSsSss....',
+    '...SSSSSSS.....',
+  ];
+  if (eyes === 'blink') rows[3] = '.sKKKssssKKss..';
+  if (eyes === 'down') {
+    rows[3] = '.swwwsssswwss..';
+    rows[4] = '.ssKSssssKSss..';
+  }
+  if (mouth === 'open') {
+    rows[8] = '.Ssssssssssss..';
+    rows[10] = '..SsSsKvvKs....';
+  }
+  if (mouth === 'flat') rows[8] = '.Ssssssssssss..';
+  return rows;
+}
+
+/** Cara de Pablo de perfil (12×11). */
+function faceSide(eyes: Eyes, mouth: Mouth): string[] {
+  const rows = [
+    '..sssss.....',
+    '.ssssssKKK..',
+    '.ssssssswKs.',
+    '.ssssssSSss.',
+    '.sssssssssl.',
+    '.ssssssssssl',
+    '.sssssssssSS',
+    '.SssssssSSs.',
+    '.SsssssKKss.',
+    '..SsSsSsss..',
+    '...SSSSSS...',
+  ];
+  if (eyes === 'squint') rows[2] = '.ssssssKKKs.';
+  if (mouth === 'open') {
+    rows[8] = '.SssssKKKss.';
+    rows[9] = '..SsSsKvKs..';
+  }
+  return rows;
+}
+
+// ---------------------------------------------------------------- piezas de Pablo
+
+/** Pelo rizado: una nube de bultos con brillo arriba y rizos marcados. */
+function curls(q: Pixels, main: [number, number, number, number], bumps: [number, number, number][]) {
+  const [cx, cy, rx, ry] = main;
+  q.ellipse(cx, cy, rx, ry, 'tierra');
+  for (const [bx, by, r] of bumps) q.circle(bx, by, r, 'tierra');
+  for (const [bx, by, r] of bumps) {
+    q.rect(bx - 1, by - r + 1, 2, 1, 'cuero');
+    q.px(bx + 1, by + 1, 'sombra');
+  }
+}
+
+function backpack(p: Pixels, ox: number, x: number, y: number, side: 'left' | 'none') {
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(x, y, 13, 18, 'amarillo');
+    q.rect(x, y, 13, 2, 'trigo');
+    if (side === 'left') {
+      q.rect(x, y, 3, 18, 'mostaza');
+      q.vline(x + 3, y, 18, 'tinta');
+    }
+    q.hline(x, y + 2, 13, 'tinta');
+    q.rect(x + 3, y + 16, 10, 2, 'mostaza');
+    // logo de la app: un rayo
+    q.pattern(x + 7, y + 6, ['.K', 'KK', '.K', 'K.'], { K: 'tinta' });
+  });
+}
+
+function shoe(p: Pixels, ox: number, ankle: Pt) {
+  const [ax, ay] = ankle;
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(ax - 2, ay, 7, 3, 'cal');
+    q.rect(ax - 2, ay + 3, 7, 1, 'piedra');
+    q.rect(ax, ay + 1, 3, 1, 'alarma');
+  });
+}
+
+function leg(p: Pixels, ox: number, hip: Pt, ankle: Pt, pants: Color) {
+  p.part(ox, 0, FRAME, FRAME, (q) => q.line(hip[0] - 1, hip[1], ankle[0] - 1, ankle[1] - 2, pants, 3));
+  shoe(p, ox, ankle);
+}
+
+function hand(q: Pixels, x: number, y: number) {
+  q.rect(x - 1, y - 1, 3, 3, 'terracota');
+  q.px(x + 1, y + 1, 'terracota-oscura');
+}
+
+// ---------------------------------------------------------------- Pablo de 3/4 (quieto, hablando)
+
+interface Pose3q {
   bob: number;
-  front: Pt; // tobillo de la pierna delantera
-  back: Pt; // tobillo de la pierna trasera
-  hand: Pt; // mano del brazo delantero
+  eyes?: Eyes;
+  mouth?: Mouth;
+  phone?: 'low' | 'mid' | 'up';
+  scroll?: boolean;
+}
+
+function drawPablo3q(p: Pixels, ox: number, pose: Pose3q) {
+  const b = pose.bob;
+  const phone = pose.phone ?? 'low';
+
+  backpack(p, ox, 7, 14 + b, 'left');
+
+  const farArm = () =>
+    p.part(ox, 0, FRAME, FRAME, (q) => {
+      const target: Pt = phone === 'low' ? [31, 31 + b] : phone === 'mid' ? [33, 26 + b] : [32, 23 + b];
+      q.line(28, 23 + b, target[0] - 1, target[1] - 1, 'oliva', 3);
+      hand(q, target[0], target[1]);
+      const [px, py] = phone === 'low' ? [32, 28 + b] : [target[0] + 1, target[1] - 5];
+      q.rect(px, py, 3, 5, 'noche');
+      if (pose.scroll) q.px(px + 1, py + 2, 'celeste-sucio');
+    });
+  if (phone === 'low') farArm();
+
+  leg(p, ox, [28, 33], [28, 43], 'noche');
+  leg(p, ox, [21, 33], [20, 43], 'pizarra');
+
+  // Cuello y sudadera
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(24, 19 + b, 4, 3, 'terracota-oscura');
+    q.rect(18, 22 + b, 12, 13 - b, 'oliva');
+    q.rect(17, 31, 14, 4, 'oliva');
+    q.rect(27, 22 + b, 3, 13 - b, 'oliva-oscuro');
+    q.rect(19, 21 + b, 10, 2, 'oliva-oscuro');
+    q.hline(20, 30, 8, 'tinta');
+    q.vline(24, 23 + b, 7 - b, 'oliva-oscuro');
+    q.rect(25, 24 + b, 2, 2, 'amarillo');
+  });
+
+  // Brazo cercano, colgando con desgana
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.line(15, 23 + b, 15, 29 + b, 'oliva', 3);
+    q.vline(15, 24 + b, 4, 'olivo-claro');
+    hand(q, 16, 32 + b);
+  });
+
+  // Pelo, oreja con auricular, cara, flequillo
+  p.part(ox, 0, FRAME, FRAME, (q) =>
+    curls(q, [23, 9 + b, 9, 6], [[15, 9 + b, 3], [16, 4 + b, 3], [21, 2 + b, 3], [27, 2 + b, 3], [31, 5 + b, 3], [14, 14 + b, 3], [24, 1 + b, 2]]),
+  );
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(17, 12 + b, 3, 4, 'terracota');
+    q.px(18, 13 + b, 'terracota-oscura');
+    q.px(18, 14 + b, 'papel');
+  });
+  p.part(ox, 0, FRAME, FRAME, (q) =>
+    q.pattern(20, 8 + b, face3q(pose.eyes ?? 'open', pose.mouth ?? 'smirk'), FACE_MAP),
+  );
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    for (const [cx, cy] of [[21, 6], [25, 5], [29, 6]] as Pt[]) {
+      q.circle(cx, cy + b, 2, 'tierra');
+      q.px(cx - 1, cy - 1 + b, 'cuero');
+    }
+  });
+
+  if (phone !== 'low') farArm();
+}
+
+// ---------------------------------------------------------------- Pablo de perfil (corre, salta, lanza)
+
+interface PoseSide {
+  bob: number;
+  front: Pt;
+  back: Pt;
+  hand: Pt;
   armBehindHead?: boolean;
   holding?: boolean;
-  mouth?: 'open';
   hurt?: boolean;
 }
 
-function leg(p: Pixels, hip: Pt, ankle: Pt, pants: 'pizarra' | 'noche') {
-  p.line(hip[0] - 1, hip[1], ankle[0] - 1, ankle[1] - 2, pants, 3);
-  p.rect(ankle[0] - 1, ankle[1], 5, 1, 'cal');
-  p.rect(ankle[0] - 1, ankle[1] + 1, 5, 1, 'piedra');
-}
-
-function drawPablo(p: Pixels, ox: number, oy: number, pose: PabloPose) {
+function drawPabloSide(p: Pixels, ox: number, pose: PoseSide) {
   const b = pose.bob;
-  const at = (x: number, y: number): Pt => [ox + x, oy + y];
-  const R = (x: number, y: number, w: number, h: number, c: Parameters<Pixels['rect']>[4]) => p.rect(ox + x, oy + y, w, h, c);
 
-  leg(p, at(22, 31 + b), at(pose.back[0], pose.back[1]), 'noche');
+  leg(p, ox, [22, 33 + b], pose.back, 'noche');
+  backpack(p, ox, 7, 15 + b, 'none');
 
-  // Mochila de reparto: la silueta de Pablo
-  R(11, 15 + b, 10, 14, 'butano');
-  R(11, 15 + b, 10, 2, 'albaricoque');
-  R(19, 17 + b, 2, 12, 'terracota');
-  R(12, 22 + b, 7, 1, 'papel');
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(25, 19 + b, 4, 3, 'terracota-oscura');
+    q.rect(19, 22 + b, 10, 12, 'oliva');
+    q.rect(19, 22 + b, 3, 12, 'oliva-oscuro');
+    q.rect(21, 21 + b, 7, 2, 'oliva-oscuro');
+    q.vline(27, 23 + b, 8, 'olivo-claro');
+    q.line(20, 22 + b, 22, 31 + b, 'tinta');
+    q.rect(25, 26 + b, 1, 1, 'amarillo');
+  });
 
-  // Torso: sudadera
-  R(20, 18 + b, 8, 13, 'oliva');
-  R(20, 18 + b, 2, 13, 'oliva-oscuro');
-  R(20, 29 + b, 8, 2, 'oliva-oscuro');
-  R(27, 19 + b, 1, 9, 'olivo-claro');
-  R(24, 21 + b, 2, 2, 'butano');
-  p.line(ox + 21, oy + 19 + b, ox + 22, oy + 27 + b, 'tierra');
+  leg(p, ox, [26, 33 + b], pose.front, 'pizarra');
 
-  leg(p, at(25, 31 + b), at(pose.front[0], pose.front[1]), 'pizarra');
-
-  const arm = () => {
-    const [hx, hy] = [ox + pose.hand[0], oy + pose.hand[1] + b];
-    p.line(ox + 25, oy + 20 + b, hx, hy, 'oliva', 2);
-    p.rect(hx, hy, 2, 2, 'terracota');
-    if (pose.holding) {
-      p.rect(hx - 1, hy - 3, 4, 3, 'cuero');
-      p.px(hx + 1, hy - 3, 'trigo');
-    }
-  };
+  const arm = () =>
+    p.part(ox, 0, FRAME, FRAME, (q) => {
+      const [hx, hy] = [pose.hand[0], pose.hand[1] + b];
+      q.line(24, 23 + b, hx - 1, hy - 1, 'oliva', 3);
+      hand(q, hx, hy);
+      if (pose.holding) {
+        q.rect(hx - 2, hy - 5, 5, 4, 'cuero');
+        q.vline(hx, hy - 5, 4, 'trigo');
+      }
+    });
   if (pose.armBehindHead) arm();
 
-  // Cabeza
-  R(24, 17 + b, 3, 2, 'terracota-oscura');
-  R(22, 8 + b, 8, 9, 'terracota');
-  R(23, 16 + b, 6, 1, 'terracota-oscura');
-  R(22, 7 + b, 8, 3, 'sombra');
-  R(22, 10 + b, 3, 3, 'sombra');
-  R(29, 10 + b, 1, 1, 'sombra');
-  R(25, 12 + b, 1, 2, 'terracota-oscura');
-  R(30, 13 + b, 1, 1, 'terracota');
-  if (pose.hurt) {
-    R(27, 12 + b, 2, 1, 'tinta');
-    R(27, 14 + b, 2, 2, 'tinta');
-  } else {
-    R(27, 11 + b, 2, 1, 'sombra');
-    R(28, 12 + b, 1, 1, 'tinta');
-    if (pose.mouth === 'open') R(27, 15 + b, 2, 1, 'tinta');
-    else R(27, 15 + b, 2, 1, 'terracota-oscura');
-  }
+  const puff = pose.hurt ? 1 : 0;
+  p.part(ox, 0, FRAME, FRAME, (q) =>
+    curls(q, [23, 9 + b, 8 + puff, 6 + puff], [[16, 8 + b, 3], [16, 13 + b, 2], [17, 4 + b, 3], [22, 2 + b - puff, 3], [28, 3 + b - puff, 3], [31, 6 + b, 2], [23, 1 + b - puff, 2]]),
+  );
+  p.part(ox, 0, FRAME, FRAME, (q) => q.pattern(23, 8 + b, faceSide(pose.hurt ? 'squint' : 'open', pose.hurt ? 'open' : 'smirk'), FACE_MAP));
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    q.rect(24, 12 + b, 3, 4, 'terracota');
+    q.px(25, 13 + b, 'terracota-oscura');
+    q.px(25, 14 + b, 'papel');
+  });
+  p.part(ox, 0, FRAME, FRAME, (q) => {
+    for (const [cx, cy] of [[26, 7], [30, 8]] as Pt[]) {
+      q.circle(cx, cy + b, 2, 'tierra');
+      q.px(cx - 1, cy - 1 + b, 'cuero');
+    }
+  });
 
   if (!pose.armBehindHead) arm();
 }
 
 function pabloSheet(scene: Phaser.Scene) {
-  const f = (ms: number, pose: PabloPose): FrameSpec => ({ ms, draw: (p, ox, oy) => drawPablo(p, ox, oy, pose) });
-  const stand: Pick<PabloPose, 'front' | 'back'> = { front: [26, 45], back: [21, 45] };
-  buildSheet(scene, 'pablo', 48, 48, {
-    idle: [f(420, { bob: 0, ...stand, hand: [26, 27] }), f(420, { bob: 1, ...stand, hand: [26, 27] })],
-    run: [
-      f(80, { bob: 0, front: [30, 45], back: [18, 44], hand: [22, 26] }),
-      f(80, { bob: 1, front: [27, 45], back: [20, 42], hand: [23, 26] }),
-      f(80, { bob: -1, front: [24, 45], back: [24, 40], hand: [26, 27] }),
-      f(80, { bob: 0, front: [18, 44], back: [30, 45], hand: [29, 26] }),
-      f(80, { bob: 1, front: [20, 42], back: [27, 45], hand: [28, 26] }),
-      f(80, { bob: -1, front: [24, 40], back: [24, 45], hand: [26, 27] }),
+  const q = (ms: number, pose: Pose3q): FrameSpec => ({ ms, draw: (p, ox) => drawPablo3q(p, ox, pose) });
+  const s = (ms: number, pose: PoseSide): FrameSpec => ({ ms, draw: (p, ox) => drawPabloSide(p, ox, pose) });
+  const stand = { front: [29, 43] as Pt, back: [21, 43] as Pt };
+  buildSheet(scene, 'pablo', FRAME, FRAME, {
+    idle: [
+      q(420, { bob: 0 }),
+      q(420, { bob: 1 }),
+      q(420, { bob: 0 }),
+      q(300, { bob: 1 }),
+      q(110, { bob: 1, eyes: 'blink' }),
+      q(420, { bob: 0 }),
     ],
-    jump: [f(100, { bob: -1, front: [28, 41], back: [21, 43], hand: [29, 13] })],
+    aburrido: [
+      q(140, { bob: 0, phone: 'mid' }),
+      q(700, { bob: 0, phone: 'up', eyes: 'down', mouth: 'flat' }),
+      q(500, { bob: 0, phone: 'up', eyes: 'down', mouth: 'flat', scroll: true }),
+      q(700, { bob: 1, phone: 'up', eyes: 'blink', mouth: 'open' }),
+      q(140, { bob: 0, phone: 'mid' }),
+    ],
+    run: [
+      s(80, { bob: 0, front: [32, 43], back: [17, 41], hand: [20, 30] }),
+      s(80, { bob: 1, front: [29, 43], back: [19, 39], hand: [21, 31] }),
+      s(80, { bob: -1, front: [25, 43], back: [24, 37], hand: [25, 31] }),
+      s(80, { bob: 0, front: [17, 41], back: [32, 43], hand: [30, 29] }),
+      s(80, { bob: 1, front: [19, 39], back: [29, 43], hand: [29, 30] }),
+      s(80, { bob: -1, front: [24, 37], back: [25, 43], hand: [25, 31] }),
+    ],
+    jump: [s(100, { bob: -1, front: [30, 39], back: [21, 41], hand: [30, 13] })],
     fall: [
-      f(120, { bob: 0, front: [27, 44], back: [21, 45], hand: [31, 21] }),
-      f(120, { bob: 0, front: [27, 45], back: [21, 44], hand: [31, 20] }),
+      s(120, { bob: 0, front: [29, 42], back: [21, 43], hand: [33, 22] }),
+      s(120, { bob: 0, front: [29, 43], back: [21, 42], hand: [33, 21] }),
     ],
     throw: [
-      f(40, { bob: 0, front: [28, 45], back: [20, 45], hand: [20, 13], armBehindHead: true, holding: true }),
-      f(90, { bob: 0, front: [28, 45], back: [20, 45], hand: [34, 19] }),
-      f(90, { bob: 1, front: [28, 45], back: [20, 45], hand: [31, 26] }),
+      s(40, { bob: 0, ...stand, hand: [18, 15], armBehindHead: true, holding: true }),
+      s(90, { bob: 0, ...stand, hand: [37, 22] }),
+      s(90, { bob: 1, ...stand, hand: [33, 30] }),
     ],
-    hurt: [f(200, { bob: 1, front: [25, 45], back: [20, 45], hand: [30, 14], hurt: true })],
+    hurt: [s(200, { bob: 1, front: [27, 43], back: [21, 43], hand: [31, 12], hurt: true })],
     talk: [
-      f(160, { bob: 0, ...stand, hand: [26, 27], mouth: 'open' }),
-      f(160, { bob: 0, ...stand, hand: [26, 27] }),
+      q(140, { bob: 0, mouth: 'open' }),
+      q(140, { bob: 0, mouth: 'flat' }),
+      q(140, { bob: 0, mouth: 'open' }),
+      q(180, { bob: 0 }),
     ],
-  }, 'tinta');
+  });
 }
 
-function drawMaruja(p: Pixels, ox: number, oy: number, bob: number, mouthOpen: boolean) {
-  const R = (x: number, y: number, w: number, h: number, c: Parameters<Pixels['rect']>[4]) => p.rect(ox + x, oy + y, w, h, c);
+// ---------------------------------------------------------------- Doña Maruja
 
-  // Carrito de la compra
-  R(31, 31, 7, 12, 'vino');
-  R(33, 31, 1, 12, 'alarma');
-  R(36, 31, 1, 12, 'alarma');
-  R(31, 35, 7, 1, 'alarma');
-  R(31, 39, 7, 1, 'ladrillo');
-  R(30, 27, 1, 17, 'hormigon');
-  p.circle(ox + 34, oy + 44, 2, 'sombra');
-  R(34, 44, 1, 1, 'piedra');
+interface MarujaPose {
+  bob: number;
+  wobble: number;
+  mouthOpen?: boolean;
+  pointing?: boolean;
+}
 
-  // Piernas y zapatos
-  R(21, 42, 2, 3, 'melocoton');
-  R(25, 42, 2, 3, 'melocoton');
-  R(20, 45, 4, 2, 'tierra');
-  R(24, 45, 4, 2, 'tierra');
+function drawMaruja(p: Pixels, ox: number, pose: MarujaPose) {
+  const b = pose.bob;
+  const P = (draw: (q: Pixels) => void) => p.part(ox, 0, FRAME, FRAME, draw);
 
-  // Bata de flores
-  R(20, 27 + bob, 9, 8, 'azulejo');
-  R(19, 34, 11, 8, 'azulejo');
-  R(19, 34, 2, 8, 'azulejo-oscuro');
-  R(20, 27 + bob, 2, 7, 'azulejo-oscuro');
-  for (let y = 28; y < 41; y += 3) for (let x = 21 + (y % 2); x < 29; x += 3) R(x, y, 1, 1, 'celeste-sucio');
-  R(25, 36, 3, 2, 'azulejo-oscuro');
+  // Pantuflas de borla y piernecillas
+  P((q) => q.rect(20, 41, 2, 4, 'melocoton'));
+  P((q) => q.rect(25, 41, 2, 4, 'melocoton'));
+  P((q) => {
+    q.rect(17, 44, 6, 3, 'rosa-influencer');
+    q.px(18, 44, 'papel');
+  });
+  P((q) => {
+    q.rect(24, 44, 6, 3, 'rosa-influencer');
+    q.px(25, 44, 'papel');
+  });
 
-  // Brazo al asa del carrito
-  p.line(ox + 26, oy + 28 + bob, ox + 29, oy + 30, 'azulejo', 2);
-  R(29, 29, 2, 2, 'albaricoque');
+  // Bata de flores, más ancha por abajo
+  P((q) => {
+    for (let y = 24 + b; y <= 42; y++) {
+      const grow = Math.floor((y - 24) / 5);
+      q.rect(19 - grow, y, 11 + grow * 2, 1, 'azulejo');
+    }
+    for (let y = 26 + b; y < 42; y += 3) {
+      for (let x = 17 + (y % 2); x < 31; x += 3) q.px(x, y, (x + y) % 2 ? 'celeste-sucio' : 'rosa-influencer');
+    }
+    q.rect(21, 24 + b, 7, 2, 'cal');
+    q.hline(18, 32, 13, 'azulejo-oscuro');
+    q.hline(20, 36, 4, 'tinta');
+  });
 
-  // Cabeza, un poco adelantada
-  R(22, 19 + bob, 7, 8, 'albaricoque');
-  R(23, 26 + bob, 5, 1, 'terracota');
-  R(21, 17 + bob, 8, 3, 'cal');
-  R(21, 20 + bob, 2, 4, 'cal');
-  R(21, 14 + bob, 4, 3, 'arena-gris');
-  R(25, 21 + bob, 4, 1, 'hormigon-oscuro');
-  R(27, 22 + bob, 1, 1, 'tinta');
-  R(29, 23 + bob, 1, 1, 'albaricoque');
-  R(26, 24 + bob, 1, 1, 'terracota');
-  R(26, 25 + bob, 2, 1, mouthOpen ? 'tinta' : 'terracota-oscura');
+  // Brazo en jarras o señalando al cielo ("¡A medir!")
+  P((q) => {
+    if (pose.pointing) {
+      q.line(19, 26 + b, 15, 19 + b, 'azulejo', 2);
+      q.rect(14, 16 + b, 2, 3, 'albaricoque');
+    } else {
+      q.line(19, 26 + b, 15, 30 + b, 'azulejo', 2);
+      q.line(15, 30 + b, 18, 33, 'azulejo', 2);
+    }
+  });
+
+  // Moño torre (absurdamente alto) y cara con gafas de culo de vaso
+  const w = pose.wobble;
+  const roll = (cx: number, cy: number, rx: number, ry: number) =>
+    P((q) => {
+      q.ellipse(cx, cy, rx, ry, 'arena-gris');
+      q.hline(cx - rx + 2, cy - ry + 1, rx, 'cal');
+      q.hline(cx - rx + 2, cy + ry - 1, rx * 2 - 3, 'piedra');
+    });
+  roll(23, 14 + b, 6, 3);
+  roll(23 + w, 10 + b, 5, 2);
+  roll(23 + w, 6 + b, 4, 2);
+  P((q) => {
+    q.circle(24 + w, 2 + b, 2, 'arena-gris');
+    q.px(23 + w, 1 + b, 'cal');
+  });
+  P((q) => q.rect(27 + w, 3 + b, 3, 1, 'alarma'));
+  P((q) => {
+    q.ellipse(24, 20 + b, 5, 4, 'albaricoque');
+    q.rect(29, 20 + b, 2, 2, 'albaricoque');
+    q.px(21, 22 + b, 'terracota');
+    q.hline(24, 23 + b, 3, pose.mouthOpen ? 'tinta' : 'terracota-oscura');
+    if (pose.mouthOpen) q.hline(24, 24 + b, 3, 'vino');
+  });
+  P((q) => {
+    q.circle(22, 19 + b, 2, 'celeste-sucio');
+    q.circle(27, 19 + b, 2, 'celeste-sucio');
+    q.px(23, 19 + b, 'tinta');
+    q.px(28, 19 + b, 'tinta');
+    q.px(21, 18 + b, 'papel');
+    q.px(26, 18 + b, 'papel');
+  });
+
+  // Brazo al carrito y carrito con barra de pan
+  P((q) => {
+    q.line(28, 26 + b, 32, 29, 'azulejo', 2);
+    q.rect(32, 28, 2, 2, 'albaricoque');
+  });
+  P((q) => q.line(37, 28, 41, 19, 'ocre', 2));
+  P((q) => {
+    q.rect(33, 27, 10, 15, 'vino');
+    for (let x = 35; x < 43; x += 3) q.vline(x, 27, 15, 'alarma');
+    for (let y = 30; y < 42; y += 4) q.hline(33, y, 10, 'alarma');
+    q.hline(33, 27, 10, 'tinta');
+  });
+  P((q) => q.vline(34, 22, 6, 'hormigon'));
+  P((q) => q.circle(35, 44, 2, 'sombra'));
+  P((q) => q.circle(41, 44, 2, 'sombra'));
 }
 
 function marujaSheet(scene: Phaser.Scene) {
-  const f = (ms: number, bob: number, mouth: boolean): FrameSpec => ({ ms, draw: (p, ox, oy) => drawMaruja(p, ox, oy, bob, mouth) });
-  buildSheet(scene, 'maruja', 48, 48, {
-    idle: [f(600, 0, false), f(600, 1, false)],
-    talk: [f(140, 0, true), f(140, 0, false), f(140, 1, true), f(180, 1, false)],
-  }, 'tinta');
+  const f = (ms: number, pose: MarujaPose): FrameSpec => ({ ms, draw: (p, ox) => drawMaruja(p, ox, pose) });
+  buildSheet(scene, 'maruja', FRAME, FRAME, {
+    idle: [f(600, { bob: 0, wobble: 0 }), f(500, { bob: 1, wobble: 1 }), f(600, { bob: 0, wobble: 0 }), f(500, { bob: 1, wobble: -1 })],
+    talk: [
+      f(140, { bob: 0, wobble: 0, mouthOpen: true, pointing: true }),
+      f(140, { bob: 0, wobble: 1, pointing: true }),
+      f(140, { bob: 1, wobble: 0, mouthOpen: true }),
+      f(180, { bob: 1, wobble: -1 }),
+    ],
+  });
 }
+
+// ---------------------------------------------------------------- Bar Manolo
 
 export const BAR_W = 160;
 export const BAR_H = 112;
 
 function drawBarManolo(p: Pixels, ox: number) {
   const rand = rng(7);
-  // La planta baja empieza en y=56: las coordenadas de abajo están escritas relativas a 92 y se desplazan.
-  const G = -36;
-  const R = (x: number, y: number, w: number, h: number, c: Parameters<Pixels['rect']>[4]) => p.rect(ox + x, y, w, h, c);
-  const RG = (x: number, y: number, w: number, h: number, c: Parameters<Pixels['rect']>[4]) => R(x, y + G, w, h, c);
+  const P = (draw: (q: Pixels) => void) => p.part(ox, 0, BAR_W, BAR_H, draw);
 
-  // Tejado, alero y chimenea
-  R(116, 0, 10, 10, 'ladrillo');
-  R(115, 0, 12, 2, 'hormigon-oscuro');
-  R(0, 8, 160, 7, 'terracota-oscura');
-  for (let x = 0; x < 160; x += 4) R(x, 8, 1, 7, 'ladrillo');
-  R(0, 8, 160, 1, 'terracota');
-  R(0, 15, 160, 2, 'tierra');
-
-  // Fachada de mortero con desconchones
-  R(2, 17, 156, 39, 'mostaza');
-  p.speckle(ox + 2, 17, 156, 39, 'ocre', 0.07, rand);
-  p.speckle(ox + 2, 17, 156, 39, 'trigo', 0.03, rand);
-  for (const [px, py, pw, ph] of [[8, 40, 9, 6], [140, 22, 8, 5], [60, 18, 6, 4]]) {
-    R(px, py, pw, ph, 'ladrillo');
-    for (let y = py + 1; y < py + ph; y += 2) R(px, y, pw, 1, 'terracota-oscura');
+  // Silueta del edificio: tejado, chimenea torcida y fachada
+  P((q) => {
+    q.rect(112, 0, 8, 4, 'ladrillo');
+    q.rect(114, 4, 8, 4, 'ladrillo');
+    q.rect(0, 8, 160, 7, 'terracota-oscura');
+    for (let x = 0; x < 160; x += 4) q.vline(x, 9, 6, 'ladrillo');
+    q.hline(0, 8, 160, 'terracota');
+    q.rect(0, 15, 160, 2, 'tierra');
+    q.rect(2, 17, 156, 95, 'mostaza');
+    q.speckle(2, 17, 156, 39, 'ocre', 0.025, rand);
+    q.hline(2, 55, 156, 'tinta');
+  });
+  // Antena de tele torcida
+  P((q) => {
+    q.line(30, 8, 34, 1, 'sombra');
+    q.hline(29, 2, 9, 'sombra');
+    q.hline(31, 4, 6, 'sombra');
+  });
+  // Desconchones
+  for (const [x, y, w, h] of [[8, 40, 9, 6], [140, 22, 8, 5]]) {
+    P((q) => {
+      q.rect(x, y, w, h, 'ladrillo');
+      for (let j = y + 1; j < y + h; j += 2) q.hline(x, j, w, 'terracota-oscura');
+    });
   }
-  R(2, 54, 156, 1, 'ocre');
-  R(2, 55, 156, 1, 'trigo');
 
-  // Balcones: una planta, tres huecos
-  for (const fy of [18]) {
-    for (const wx of [22, 70, 118]) {
-      R(wx - 4, fy + 6, 4, 22, 'oliva');
-      R(wx + 16, fy + 6, 4, 22, 'oliva');
-      for (let y = fy + 7; y < fy + 28; y += 2) {
-        R(wx - 4, y, 4, 1, 'oliva-oscuro');
-        R(wx + 16, y, 4, 1, 'oliva-oscuro');
+  // Planta de arriba: balcones con contraventanas y unos calzoncillos tendidos
+  for (const wx of [22, 70, 118]) {
+    P((q) => {
+      q.box(wx - 5, 23, 5, 23, 'oliva');
+      q.box(wx + 16, 23, 5, 23, 'oliva');
+      for (let y = 25; y < 45; y += 2) {
+        q.hline(wx - 4, y, 3, 'oliva-oscuro');
+        q.hline(wx + 17, y, 3, 'oliva-oscuro');
       }
-      R(wx, fy + 4, 16, 24, 'cal');
-      R(wx + 2, fy + 6, 12, 22, 'noche');
-      R(wx + 7, fy + 6, 2, 22, 'cal');
-      R(wx + 3, fy + 7, 2, 6, 'pizarra');
-      R(wx - 6, fy + 28, 28, 2, 'arena-gris');
-      R(wx - 6, fy + 20, 28, 1, 'tinta');
-      for (let x = wx - 6; x < wx + 22; x += 3) R(x, fy + 21, 1, 7, 'tinta');
-    }
+    });
+    P((q) => {
+      q.box(wx, 21, 16, 26, 'cal');
+      q.box(wx + 2, 23, 12, 24, 'noche');
+      q.vline(wx + 8, 23, 24, 'tinta');
+      q.rect(wx + 3, 24, 2, 6, 'pizarra');
+    });
+    P((q) => {
+      q.rect(wx - 6, 46, 28, 3, 'arena-gris');
+      q.hline(wx - 6, 37, 28, 'tinta');
+      for (let x = wx - 6; x < wx + 22; x += 3) q.vline(x, 38, 8, 'tinta');
+    });
   }
-  R(18, 35, 3, 3, 'terracota');
-  R(18, 33, 3, 2, 'oliva');
-  R(131, 35, 3, 3, 'terracota');
-  R(131, 33, 3, 1, 'alarma');
+  P((q) => {
+    q.hline(64, 31, 34, 'tinta');
+    q.rect(72, 32, 8, 6, 'rosa-influencer');
+    q.rect(72, 36, 3, 3, 'rosa-influencer');
+    q.rect(77, 36, 3, 3, 'rosa-influencer');
+    q.px(75, 34, 'papel');
+    q.rect(84, 32, 4, 7, 'papel');
+  });
 
   // Planta baja: la taberna
-  RG(2, 92, 156, 52, 'vino');
-  RG(2, 92, 156, 2, 'ladrillo');
+  P((q) => q.rect(2, 56, 156, 56, 'vino'));
 
-  // Rótulo
-  const label = 'BAR MANOLO';
-  RG(8, 94, 84, 13, 'papel');
-  RG(9, 95, 82, 11, 'ladrillo');
-  drawText(p, label, ox + 8 + Math.floor((84 - measureText(label)) / 2), 97 + G - CAP_TOP, 'trigo');
+  // Rótulo con la O caída
+  P((q) => {
+    q.box(8, 58, 84, 14, 'ladrillo');
+    q.hline(9, 59, 82, 'papel');
+    const label = 'BAR MANOL';
+    const lx = 8 + Math.floor((84 - measureText('BAR MANOLO')) / 2);
+    drawText(q, label, lx, 62 - CAP_TOP, 'trigo');
+    drawText(q, 'O', lx + measureText(label) + 2, 64 - CAP_TOP, 'trigo');
+  });
 
-  // Toldo de rayas
-  for (let x = 6; x < 94; x++) RG(x, 108, 1, 7, Math.floor((x - 6) / 4) % 2 ? 'cal' : 'oliva');
-  for (let x = 6; x < 94; x += 4) RG(x, 115, 2, 1, 'oliva');
+  // Toldo de rayas con un gato durmiendo encima
+  P((q) => {
+    for (let x = 6; x < 94; x++) q.vline(x, 74, 6, Math.floor((x - 6) / 4) % 2 ? 'cal' : 'oliva');
+    for (let x = 6; x < 94; x += 4) q.rect(x, 80, 2, 1, 'oliva');
+  });
+  P((q) => {
+    q.ellipse(70, 71, 5, 2, 'cuero');
+    q.rect(74, 68, 3, 3, 'cuero');
+    q.px(74, 67, 'cuero');
+    q.px(76, 67, 'cuero');
+    q.hline(66, 72, 6, 'tierra');
+  });
 
-  // Escaparate con luz cálida
-  RG(8, 117, 84, 23, 'tierra');
-  RG(10, 118, 80, 21, 'trigo');
-  RG(10, 118, 80, 2, 'mostaza');
-  for (let x = 14; x < 86; x += 5) RG(x, 120, 2, 4, x % 3 ? 'oliva-oscuro' : 'tierra');
-  RG(10, 124, 80, 1, 'cuero');
-  RG(72, 127, 6, 7, 'sombra');
-  RG(73, 124, 4, 4, 'sombra');
-  RG(10, 134, 80, 5, 'cuero');
-  RG(10, 134, 80, 1, 'ocre');
-  drawText(p, 'CAÑA+TAPA 2€', ox + 14, 126 + G - CAP_TOP, 'vino');
+  // Escaparate: jamones colgando, oferta y un parroquiano de toda la vida
+  P((q) => {
+    q.box(8, 82, 84, 23, 'trigo');
+    q.rect(9, 83, 82, 2, 'mostaza');
+    q.rect(9, 99, 82, 5, 'cuero');
+    q.hline(9, 99, 82, 'tinta');
+  });
+  for (const jx of [12, 24]) {
+    P((q) => {
+      q.vline(jx + 2, 83, 3, 'tinta');
+      q.ellipse(jx + 2, 91, 3, 5, 'vino');
+      q.rect(jx + 1, 86, 2, 2, 'cal');
+      q.px(jx + 1, 92, 'terracota');
+    });
+  }
+  P((q) => drawText(q, 'CAÑA+TAPA 2€', 34, 87 - CAP_TOP, 'vino'));
+  P((q) => {
+    q.rect(80, 95, 8, 4, 'sombra');
+    q.circle(84, 93, 2, 'sombra');
+  });
 
   // Puerta
-  RG(102, 98, 24, 46, 'tierra');
-  RG(104, 100, 20, 44, 'cuero');
-  RG(106, 102, 16, 16, 'trigo');
-  RG(113, 102, 2, 16, 'cuero');
-  RG(106, 122, 16, 20, 'tierra');
-  RG(120, 124, 2, 3, 'mostaza');
+  P((q) => {
+    q.box(101, 62, 26, 50, 'cuero');
+    q.box(105, 66, 18, 17, 'trigo');
+    q.vline(113, 66, 17, 'tinta');
+    q.box(105, 86, 18, 23, 'tierra');
+    q.rect(121, 88, 2, 3, 'mostaza');
+  });
 
-  // Pizarra con el menú
-  RG(132, 112, 20, 22, 'cuero');
-  RG(133, 113, 18, 20, 'sombra');
-  const chalk = rng(3);
-  for (let y = 116; y < 131; y += 3) RG(135, y, 4 + Math.floor(chalk() * 10), 1, 'cal');
+  // Pizarra: "AQUÍ NO HAY BRUNCH"
+  P((q) => {
+    q.box(130, 74, 27, 31, 'cuero');
+    q.rect(131, 75, 25, 29, 'sombra');
+    drawText(q, 'AQUÍ', 133, 78 - CAP_TOP, 'cal');
+    drawText(q, 'NO HAY', 133, 87 - CAP_TOP, 'cal');
+    drawText(q, 'BRUNCH', 133, 96 - CAP_TOP, 'cal');
+  });
 
   // Zócalo de azulejo
-  RG(2, 140, 100, 4, 'azulejo');
-  for (let x = 3; x < 102; x += 3) RG(x, 141, 1, 1, 'cal');
-  RG(126, 140, 32, 4, 'azulejo');
-  for (let x = 127; x < 158; x += 3) RG(x, 141, 1, 1, 'cal');
+  P((q) => {
+    q.rect(2, 106, 99, 6, 'azulejo');
+    for (let x = 3; x < 100; x += 3) q.px(x, 108, 'cal');
+    q.rect(127, 106, 31, 6, 'azulejo');
+    for (let x = 128; x < 157; x += 3) q.px(x, 108, 'cal');
+  });
 }
 
 function barSheet(scene: Phaser.Scene) {
@@ -271,32 +559,40 @@ function barSheet(scene: Phaser.Scene) {
   });
 }
 
+// ---------------------------------------------------------------- objetos
+
 function propTextures(scene: Phaser.Scene) {
-  buildTexture(scene, 'paquete', 7, 7, (p) => {
-    p.rect(1, 1, 5, 5, 'cuero');
-    p.rect(1, 1, 5, 1, 'ocre');
-    p.rect(3, 1, 1, 5, 'trigo');
-    p.outline(0, 0, 7, 7, 'tinta');
+  buildTexture(scene, 'paquete', 9, 9, (p) => {
+    p.part(0, 0, 9, 9, (q) => {
+      q.rect(1, 1, 7, 7, 'cuero');
+      q.rect(1, 1, 7, 2, 'ocre');
+      q.vline(4, 1, 7, 'trigo');
+      q.hline(1, 3, 7, 'tinta');
+    });
   });
 
-  const board = (p: Pixels) => {
-    p.rect(1, 1, 24, 13, 'papel');
-    p.rect(1, 1, 24, 3, 'turquesa');
-    drawText(p, 'PLAN', 1 + Math.floor((24 - measureText('PLAN')) / 2), 6 - CAP_TOP, 'turquesa');
-  };
-  buildTexture(scene, 'cartel', 26, 37, (p) => {
-    p.rect(12, 14, 2, 21, 'hormigon');
-    p.rect(9, 33, 8, 2, 'hormigon-oscuro');
-    board(p);
-    p.outline(0, 0, 26, 37, 'tinta');
+  buildTexture(scene, 'cartel', 28, 38, (p) => {
+    p.part(0, 0, 28, 38, (q) => {
+      q.rect(12, 15, 3, 20, 'hormigon');
+      q.rect(9, 34, 9, 3, 'hormigon-oscuro');
+    });
+    p.part(0, 0, 28, 38, (q) => {
+      q.box(1, 1, 26, 15, 'papel');
+      q.rect(2, 2, 24, 3, 'turquesa');
+      q.hline(2, 5, 24, 'tinta');
+      drawText(q, 'PLAN', 1 + Math.floor((26 - measureText('PLAN')) / 2), 8 - CAP_TOP, 'turquesa');
+    });
   });
-  buildTexture(scene, 'cartel-roto', 26, 37, (p) => {
-    p.rect(12, 26, 2, 9, 'hormigon');
-    p.px(13, 25, 'hormigon');
-    p.rect(9, 33, 8, 2, 'hormigon-oscuro');
-    p.rect(14, 27, 4, 3, 'papel');
-    p.px(17, 30, 'papel');
-    p.outline(0, 0, 26, 37, 'tinta');
+  buildTexture(scene, 'cartel-roto', 28, 38, (p) => {
+    p.part(0, 0, 28, 38, (q) => {
+      q.rect(12, 27, 3, 8, 'hormigon');
+      q.px(13, 26, 'hormigon');
+      q.rect(9, 34, 9, 3, 'hormigon-oscuro');
+    });
+    p.part(0, 0, 28, 38, (q) => {
+      q.rect(15, 28, 5, 3, 'papel');
+      q.px(19, 31, 'papel');
+    });
   });
 
   // Partículas: blancas para teñirlas al emitir

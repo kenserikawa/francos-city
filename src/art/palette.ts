@@ -3,7 +3,7 @@ import gpl from '../../art/paleta/francos-city.gpl?raw';
 // La fuente de verdad es art/paleta/francos-city.gpl (la misma que se carga en Aseprite).
 export const COLOR_NAMES = [
   'tinta', 'sombra', 'hormigon-oscuro', 'hormigon', 'piedra', 'arena-gris', 'cal', 'papel',
-  'vino', 'ladrillo', 'terracota-oscura', 'terracota', 'albaricoque', 'melocoton', 'alarma', 'butano',
+  'vino', 'ladrillo', 'terracota-oscura', 'terracota', 'albaricoque', 'melocoton', 'alarma', 'amarillo',
   'tierra', 'cuero', 'ocre', 'mostaza', 'trigo', 'oliva-oscuro', 'oliva', 'olivo-claro',
   'noche', 'pizarra', 'azulejo-oscuro', 'azulejo', 'cielo-polvo', 'celeste-sucio', 'turquesa', 'rosa-influencer',
 ] as const;

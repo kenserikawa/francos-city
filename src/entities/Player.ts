@@ -19,6 +19,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private nextThrowAt = 0;
   private wasGrounded = true;
   private nextStepAt = 0;
+  private idleSince = -1;
+  private boredUntil = 0;
+  private nextBoredAt = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'pablo');
@@ -93,6 +96,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     let name = 'idle';
     if (!grounded) name = this.body.velocity.y < 0 ? 'jump' : 'fall';
     else if (Math.abs(this.body.velocity.x) > 10) name = 'run';
+
+    if (name !== 'idle') {
+      this.idleSince = -1;
+      this.boredUntil = 0;
+    } else {
+      if (this.idleSince < 0) this.idleSince = time;
+      if (time < this.boredUntil) return;
+      // Quieto un rato: saca el móvil
+      const bored = this.scene.anims.get('pablo:aburrido');
+      if (bored && time - this.idleSince > 4500 && time >= this.nextBoredAt) {
+        this.play(bored);
+        this.boredUntil = time + bored.frames.reduce((ms, f) => ms + (f.duration || bored.msPerFrame), 0);
+        this.nextBoredAt = time + 9000;
+        return;
+      }
+    }
     this.play(animKey(this.scene, 'pablo', name), true);
   }
 }

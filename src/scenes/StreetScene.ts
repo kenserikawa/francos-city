@@ -6,7 +6,7 @@ import { animKey } from '../art/sprites';
 import { Controls } from '../input/Controls';
 import { Player } from '../entities/Player';
 import { Cartel } from '../entities/Cartel';
-import { blinkOut, createFx, floatText, hitStop, shake, type Fx } from '../fx/juice';
+import { blinkOut, createFx, floatText, hitStop, shake, snap, type Fx } from '../fx/juice';
 import { label, speechBubble } from '../ui/text';
 import { addStreetBackdrop } from './backdrop';
 
@@ -167,7 +167,7 @@ export class StreetScene extends Phaser.Scene {
       const text = BARKS[this.barkIndex++ % BARKS.length];
       this.maruja.play(animKey(this, 'maruja', 'talk'));
       const bubble = speechBubble(this, this.maruja.x, this.maruja.y - 36, text).setDepth(DEPTH.bubble);
-      this.tweens.add({ targets: bubble, y: { from: bubble.y + 3, to: bubble.y }, duration: 140, ease: 'Back.easeOut' });
+      this.tweens.add({ targets: bubble, y: { from: bubble.y + 3, to: bubble.y }, duration: 140, ease: 'Back.easeOut', onUpdate: () => snap(bubble) });
       this.bubble = bubble;
       this.time.delayedCall(1200 + text.length * 45, () => {
         this.maruja.play(animKey(this, 'maruja', 'idle'));
@@ -183,8 +183,8 @@ export class StreetScene extends Phaser.Scene {
     this.tweens.chain({
       targets: plate,
       tweens: [
-        { y: 8, duration: 420, ease: 'Back.easeOut', delay: 450 },
-        { y: -40, duration: 360, ease: 'Cubic.easeIn', delay: 3200 },
+        { y: 8, duration: 420, ease: 'Back.easeOut', delay: 450, onUpdate: () => snap(plate) },
+        { y: -40, duration: 360, ease: 'Cubic.easeIn', delay: 3200, onUpdate: () => snap(plate) },
       ],
     });
   }

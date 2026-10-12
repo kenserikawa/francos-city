@@ -77,6 +77,30 @@ export class Pixels {
     }
   }
 
+  ellipse(cx: number, cy: number, rx: number, ry: number, c: Color) {
+    for (let y = -ry; y <= ry; y++) {
+      const half = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry))) + 0.5);
+      this.rect(cx - half, cy + y, half * 2 + 1, 1, c);
+    }
+  }
+
+  /** Rectángulo con borde de 1 px (tinta por defecto): ventanas, carteles, puertas. */
+  box(x: number, y: number, w: number, h: number, fill: Color, border: Color = 'tinta') {
+    this.rect(x, y, w, h, border);
+    this.rect(x + 1, y + 1, w - 2, h - 2, fill);
+  }
+
+  /**
+   * Pieza con contorno propio: se dibuja en una capa aparte, se le pone contorno y se pega encima.
+   * Componer piezas así da las líneas interiores que separan pelo, cara, mochila, brazos...
+   */
+  part(x: number, y: number, w: number, h: number, draw: (q: Pixels) => void, outline: Color = 'tinta') {
+    const q = new Pixels(w, h);
+    draw(q);
+    q.outline(0, 0, w, h, outline);
+    this.ctx.drawImage(q.canvas, x, y);
+  }
+
   /** Estampa un dibujo hecho con caracteres; los que no estén en `map` son transparentes. */
   pattern(x: number, y: number, rows: string[], map: Record<string, Color>) {
     rows.forEach((row, j) => {
