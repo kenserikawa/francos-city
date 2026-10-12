@@ -5,7 +5,7 @@
    "frame": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -13,21 +13,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
-   "duration": 600
+   "duration": 700
   },
   {
-   "filename": "aburrido 1",
+   "filename": "idle 1",
    "frame": {
-    "x": 24,
+    "x": 32,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -35,11 +35,11 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 500
@@ -47,9 +47,9 @@
   {
    "filename": "aburrido 2",
    "frame": {
-    "x": 48,
+    "x": 64,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -57,21 +57,43 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
+    "h": 36
+   },
+   "duration": 500
+  },
+  {
+   "filename": "aburrido 3",
+   "frame": {
+    "x": 96,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 32,
     "h": 36
    },
    "duration": 250
   },
   {
-   "filename": "aburrido 3",
+   "filename": "aburrido 4",
    "frame": {
-    "x": 72,
+    "x": 128,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -79,43 +101,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 900
   },
   {
-   "filename": "run 4",
-   "frame": {
-    "x": 96,
-    "y": 0,
-    "w": 24,
-    "h": 36
-   },
-   "rotated": false,
-   "trimmed": false,
-   "spriteSourceSize": {
-    "x": 0,
-    "y": 0,
-    "w": 24,
-    "h": 36
-   },
-   "sourceSize": {
-    "w": 24,
-    "h": 36
-   },
-   "duration": 95
-  },
-  {
    "filename": "run 5",
    "frame": {
-    "x": 120,
+    "x": 160,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -123,11 +123,11 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 95
@@ -135,9 +135,9 @@
   {
    "filename": "run 6",
    "frame": {
-    "x": 144,
+    "x": 192,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -145,11 +145,11 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 95
@@ -157,9 +157,9 @@
   {
    "filename": "run 7",
    "frame": {
-    "x": 168,
+    "x": 224,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -167,21 +167,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 95
   },
   {
-   "filename": "jump 8",
+   "filename": "run 8",
    "frame": {
-    "x": 192,
+    "x": 256,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -189,21 +189,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
-   "duration": 120
+   "duration": 95
   },
   {
-   "filename": "throw 9",
+   "filename": "jump 9",
    "frame": {
-    "x": 216,
+    "x": 288,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -211,21 +211,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
-   "duration": 140
+   "duration": 100
   },
   {
-   "filename": "hurt 10",
+   "filename": "throw 10",
    "frame": {
-    "x": 240,
+    "x": 320,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -233,21 +233,43 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
+    "h": 36
+   },
+   "duration": 220
+  },
+  {
+   "filename": "hurt 11",
+   "frame": {
+    "x": 352,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 32,
     "h": 36
    },
    "duration": 300
   },
   {
-   "filename": "talk 11",
+   "filename": "talk 12",
    "frame": {
-    "x": 264,
+    "x": 384,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -255,21 +277,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 160
   },
   {
-   "filename": "talk 12",
+   "filename": "talk 13",
    "frame": {
-    "x": 288,
+    "x": 416,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -277,22 +299,22 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 24,
+    "w": 32,
     "h": 36
    },
    "duration": 160
   }
  ],
  "meta": {
-  "app": "stitch \u2192 pack_aseprite.py",
+  "app": "art/generador/personajes.py",
   "image": "pablo.png",
   "format": "RGBA8888",
   "size": {
-   "w": 312,
+   "w": 448,
    "h": 36
   },
   "scale": "1",
@@ -300,43 +322,43 @@
    {
     "name": "idle",
     "from": 0,
-    "to": 0,
+    "to": 1,
     "direction": "forward"
    },
    {
     "name": "aburrido",
-    "from": 1,
-    "to": 3,
+    "from": 2,
+    "to": 4,
     "direction": "forward"
    },
    {
     "name": "run",
-    "from": 4,
-    "to": 7,
-    "direction": "forward"
-   },
-   {
-    "name": "jump",
-    "from": 8,
+    "from": 5,
     "to": 8,
     "direction": "forward"
    },
    {
-    "name": "throw",
+    "name": "jump",
     "from": 9,
     "to": 9,
     "direction": "forward"
    },
    {
-    "name": "hurt",
+    "name": "throw",
     "from": 10,
     "to": 10,
     "direction": "forward"
    },
    {
-    "name": "talk",
+    "name": "hurt",
     "from": 11,
-    "to": 12,
+    "to": 11,
+    "direction": "forward"
+   },
+   {
+    "name": "talk",
+    "from": 12,
+    "to": 13,
     "direction": "forward"
    }
   ]

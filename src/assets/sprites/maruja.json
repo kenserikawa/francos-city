@@ -5,7 +5,7 @@
    "frame": {
     "x": 0,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -13,21 +13,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 30,
+    "w": 32,
     "h": 36
    },
-   "duration": 700
+   "duration": 1800
   },
   {
-   "filename": "talk 1",
+   "filename": "idle 1",
    "frame": {
-    "x": 30,
+    "x": 32,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -35,21 +35,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 30,
+    "w": 32,
     "h": 36
    },
-   "duration": 180
+   "duration": 140
   },
   {
    "filename": "talk 2",
    "frame": {
-    "x": 60,
+    "x": 64,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -57,21 +57,21 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "duration": 180
   },
   {
-   "filename": "senala 3",
+   "filename": "talk 3",
    "frame": {
-    "x": 90,
+    "x": 96,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "rotated": false,
@@ -79,22 +79,44 @@
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 30,
+    "w": 32,
     "h": 36
    },
    "sourceSize": {
-    "w": 30,
+    "w": 32,
     "h": 36
    },
-   "duration": 600
+   "duration": 180
+  },
+  {
+   "filename": "senala 4",
+   "frame": {
+    "x": 128,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 32,
+    "h": 36
+   },
+   "duration": 400
   }
  ],
  "meta": {
-  "app": "stitch \u2192 pack_aseprite.py",
+  "app": "art/generador/personajes.py",
   "image": "maruja.png",
   "format": "RGBA8888",
   "size": {
-   "w": 120,
+   "w": 160,
    "h": 36
   },
   "scale": "1",
@@ -102,19 +124,19 @@
    {
     "name": "idle",
     "from": 0,
-    "to": 0,
+    "to": 1,
     "direction": "forward"
    },
    {
     "name": "talk",
-    "from": 1,
-    "to": 2,
+    "from": 2,
+    "to": 3,
     "direction": "forward"
    },
    {
     "name": "senala",
-    "from": 3,
-    "to": 3,
+    "from": 4,
+    "to": 4,
     "direction": "forward"
    }
   ]

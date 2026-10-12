@@ -22,7 +22,11 @@ Diseño y decisiones: `foundation-doc.md` (sección 20). Hitos: sección 19.
   prioridad; si no existe, `buildPlaceholders` genera uno procedural con la misma clave.
   Animaciones como `<clave>:<tag>`; resolver siempre con `animKey()` (aplica los fallbacks).
 - El usuario diseña Pablo, Doña Maruja y el Bar Manolo; no sustituir su arte por arte generado.
-  Los `pablo` y `maruja` actuales de `src/assets/sprites` son provisionales, generados con Stitch
-  (colores ajustados a la paleta); el arte del usuario los reemplaza exportando con la misma clave.
+  Los `pablo` y `maruja` actuales de `src/assets/sprites` son provisionales: los genera
+  `art/generador/personajes.py` (rejillas de letras con la paleta; `python3 art/generador/personajes.py`).
+  El arte del usuario los reemplaza exportando con la misma clave; entonces no volver a ejecutar el generador.
+- Estilo de personajes: el de los secundarios de LISA. Cabeza enorme (más de la mitad de la altura),
+  cuerpo corto, piernas mínimas, manoplas redondas, nariz larga y ojos de punto, contorno negro de 1 px
+  alrededor de cada pieza (cabeza, brazos, cuerpo) y una sombra plana por material.
 - Textos del juego y comentarios en español.
 - Git: el remoto es la cuenta personal (`git@github.com:kenserikawa/...`); la identidad la pone `includeIf`.
