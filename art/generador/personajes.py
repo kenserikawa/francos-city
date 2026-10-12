@@ -182,10 +182,10 @@ TORSO = Pieza([
     "..fffffff..",
     ".fffffffff.",
     "fffffffffff",
-    "fUfffffffff",
-    "FUfffffffff",
-    "cUccccccccc",
-    "FUfffffffff",
+    "ffUffffffff",
+    "FfUffffffff",
+    "ccUcccccccc",
+    "FfUffffffff",
     "FFfffffffff",
     "ZZZZZZZZZZZ",
 ])
@@ -233,11 +233,16 @@ MOCHILA = Pieza([
     "ooooooooooo",
 ])
 
+# Brazo del fondo (derecha del torso) y brazo cercano (izquierda, por delante de la mochila)
 BRAZOS = {
     'colgando': Pieza(["zz.", "zz.", "zz.", "Zz.", "mmm", "mmm"]),
     'lanza': Pieza(["zzzzmm", "ZZZzmm"]),
     'alto': Pieza(["...mm", "..zmm", ".zz..", "zz..."]),
     'movil': Pieza(["zz", "zz", "Zz"]),
+}
+BRAZOS_CERCA = {
+    'colgando': Pieza([".zz", ".zz", ".zz", ".zZ", "mmm", "mmm"]),
+    'alto': Pieza(["mm...", "mmz..", "..zz.", "...zz"]),
 }
 MANO = Pieza(["mmm", "mmm"])
 MOVIL = Pieza(["kkk", "kxk", "kek", "kkk"], contorno=False)
@@ -249,20 +254,24 @@ def cara(cejas='normal', ojos='normal', boca='normal'):
 
 
 def pablo(cuerpo_dy=0, cabeza_dy=0, piernas=((13, 0), (17, 0)), brazo='colgando', brazo_d=(0, 0),
-          mano_trasera=(0, 0), mochila_dy=0, gesto=None):
-    """Monta un frame. piernas: (x, alzado) de la trasera y la delantera; brazo_d desplaza el delantero."""
+          cerca='colgando', cerca_d=(0, 0), mochila_dy=0, gesto=None):
+    """Monta un frame. piernas: (x, alzado) de cada muñón; brazo/cerca: pose y desplazamiento de cada brazo."""
     capas = []
     base = PABLO_H - 2                      # última fila de los muñones
     cy = base - 12 - cuerpo_dy              # arriba del torso
     hy = cy - 18 + cabeza_dy                # arriba de la cabeza
-    capas.append((MOCHILA, 2, cy - 7 + mochila_dy))
-    capas.append((MANO, 10 + mano_trasera[0], cy + 6 + mano_trasera[1]))
+    capas.append((MOCHILA, 1, cy - 8 + mochila_dy))
     for x, alzado in piernas:               # trasera, luego delantera
         capas.append((MUNON, x, base - 3 - alzado))
     capas.append((TORSO, 11, cy))
     capas.append((CABEZA, 8, hy))
     capas += [(p, 8, hy) for p in cara(**(gesto or {}))]
     capas.append((CASCO, 7, hy - 2))
+    cx, cdy = cerca_d
+    if cerca == 'alto':
+        capas.append((BRAZOS_CERCA[cerca], 6 + cx, cy + 1 + cdy))
+    else:
+        capas.append((BRAZOS_CERCA[cerca], 9 + cx, cy + 3 + cdy))
     bx, by = brazo_d
     if brazo == 'movil':
         capas.append((BRAZOS[brazo], 19 + bx, cy + 3 + by))
@@ -278,9 +287,9 @@ def pablo(cuerpo_dy=0, cabeza_dy=0, piernas=((13, 0), (17, 0)), brazo='colgando'
 def hoja_pablo():
     idle = [(pablo(), 700), (pablo(cabeza_dy=1, mochila_dy=1), 500)]
     run = [
-        (pablo(piernas=((12, 1), (18, 0)), brazo_d=(1, -1), mano_trasera=(-1, 0), mochila_dy=1), 95),
+        (pablo(piernas=((12, 1), (18, 0)), brazo_d=(1, -1), cerca_d=(-1, 0), mochila_dy=1), 95),
         (pablo(cuerpo_dy=1, piernas=((13, 0), (17, 1))), 95),
-        (pablo(piernas=((12, 0), (18, 1)), brazo_d=(-1, 0), mano_trasera=(1, -1), mochila_dy=1), 95),
+        (pablo(piernas=((12, 0), (18, 1)), brazo_d=(-1, 0), cerca_d=(1, -1), mochila_dy=1), 95),
         (pablo(cuerpo_dy=1, piernas=((13, 1), (17, 0))), 95),
     ]
     movil = {'brazo': 'movil'}
@@ -290,9 +299,9 @@ def hoja_pablo():
                       (pablo(**movil, gesto={'ojos': 'abajo', 'cejas': 'arriba'}), 250),
                       (pablo(**movil, cabeza_dy=1, gesto={'ojos': 'cerrados', 'boca': 'abierta'}), 900)]),
         ('run', run),
-        ('jump', [(pablo(cuerpo_dy=2, piernas=((13, 2), (17, 1)), brazo='alto', gesto={'boca': 'abierta'}), 100)]),
+        ('jump', [(pablo(cuerpo_dy=2, piernas=((13, 2), (17, 1)), brazo='alto', cerca='alto', gesto={'boca': 'abierta'}), 100)]),
         ('throw', [(pablo(brazo='lanza', gesto={'cejas': 'enfado', 'boca': 'abierta'}), 220)]),
-        ('hurt', [(pablo(cabeza_dy=-1, brazo='alto', gesto={'ojos': 'susto', 'cejas': 'arriba', 'boca': 'grito'}), 300)]),
+        ('hurt', [(pablo(cabeza_dy=-1, brazo='alto', cerca='alto', gesto={'ojos': 'susto', 'cejas': 'arriba', 'boca': 'grito'}), 300)]),
         ('talk', [(pablo(gesto={'boca': 'abierta'}), 160), (pablo(), 160)]),
     ]
 
@@ -363,7 +372,8 @@ M_BRAZOS = {
     'gesto': Pieza(["qqq.mm", "Zqqmmm"]),
     'senala': Pieza(["qqqqmmm.", "ZZZqmmmmm", "....mm..."]),
 }
-M_MANO = Pieza(["mmm", "mmm"])
+# Brazo cercano: sale del costado izquierdo y agarra el asa del carrito
+M_BRAZO_CERCA = Pieza(["mm...", "mmqqq", "..qqZ"])
 M_PIERNA = Pieza(["uu", "uu", "uo"])
 M_ZAPATILLA = Pieza(["ZZZw", "ZZZZ"])
 CARRITO = Pieza([
@@ -374,11 +384,9 @@ CARRITO = Pieza([
     "rrrrrrrr",
     "rOOrOOrO",
     "rOOrOOrO",
-    "rrrrrrrr",
-    "rOOrOOrO",
     "QQQQQQQQ",
 ])
-ASA = Pieza(["gg", ".g", ".g", ".g", ".g", ".g", ".g"])
+ASA = Pieza(["g", "g", "g"])
 RUEDA = Pieza([".k.", "kgk", ".k."])
 
 
@@ -386,8 +394,7 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     base = MARUJA_H - 3
     cy = base - 3 - 10 + 1                  # arriba de la bata
     hy = cy - 16 + cabeza_dy
-    capas = [(ASA, 9, cy - 4), (CARRITO, 1, cy + 2), (RUEDA, 2, base - 1), (RUEDA, 6, base - 1)]
-    capas.append((M_MANO, 9, cy + 3))       # la mano de atrás agarra el asa
+    capas = [(ASA, 7, cy + 2), (CARRITO, 0, cy + 4), (RUEDA, 1, base - 1), (RUEDA, 5, base - 1)]
     for x in (14, 19):
         capas.append((M_PIERNA, x, base - 3))
         capas.append((M_ZAPATILLA, x, base))
@@ -398,6 +405,7 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     capas += [(RULO[(i + 1) % 2], 11 + 6 * i, hy + 1) for i in range(2)]
     capas += [(p, 8, hy) for p in (M_NARIZ, M_GAFAS, M_OJOS[ojos], M_BOCA[boca])]
     capas.append((M_PENDIENTE, 10, hy + 13))
+    capas.append((M_BRAZO_CERCA, 7, cy + 1))
     if brazo == 'senala':
         capas.append((M_BRAZOS[brazo], 21, cy + 2))
     elif brazo == 'gesto':
