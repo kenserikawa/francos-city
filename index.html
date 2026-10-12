@@ -2,12 +2,19 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#0e0b0d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <title>Francos City</title>
     <link rel="icon" href="data:," />
     <style>
       html, body { margin: 0; height: 100%; background: #0e0b0d; overflow: hidden; }
-      #game { width: 100%; height: 100%; }
+      /* Móvil: sin scroll, zoom, selección ni menú al mantener pulsado */
+      html, body { touch-action: none; overscroll-behavior: none; user-select: none;
+        -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+      #game { width: 100%; height: 100%; height: 100dvh; }
       canvas { display: block; image-rendering: pixelated; }
     </style>
   </head>

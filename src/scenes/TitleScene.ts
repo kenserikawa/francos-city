@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
-import { GAME_W, GAME_H, WORLD_W, DEPTH } from '../config';
+import { GAME_W, GAME_H, WORLD_W, DEPTH, IS_TOUCH } from '../config';
 import { PAL } from '../art/palette';
 import { measureText } from '../art/font';
 import { Controls } from '../input/Controls';
+import { touch } from '../input/TouchPad';
 import { label } from '../ui/text';
 import { addStreetBackdrop } from './backdrop';
 
@@ -17,6 +18,7 @@ export class TitleScene extends Phaser.Scene {
   create() {
     this.leaving = false;
     this.controls = new Controls(this);
+    touch.setVisible(false);
     addStreetBackdrop(this);
 
     // La calle pasa despacio por detrás, ida y vuelta
@@ -34,7 +36,7 @@ export class TitleScene extends Phaser.Scene {
     label(this, tx, 30 - scale, title, 'papel', { scale, shadow: null, scroll: 0, depth: DEPTH.hud });
     label(this, GAME_W / 2, 66, 'El Plan de Autenticidad', 'trigo', { origin: [0.5, 0], scroll: 0, depth: DEPTH.hud });
 
-    const prompt = label(this, GAME_W / 2, 86, 'Pulsa Z o Intro', 'papel', { origin: [0.5, 0], scroll: 0, depth: DEPTH.hud });
+    const prompt = label(this, GAME_W / 2, 86, IS_TOUCH ? 'Toca la pantalla' : 'Pulsa Z o Intro', 'papel', { origin: [0.5, 0], scroll: 0, depth: DEPTH.hud });
     this.time.addEvent({ delay: 530, loop: true, callback: () => prompt.setVisible(!prompt.visible) });
 
     label(this, GAME_W - 4, GAME_H - 3, 'prototipo · hito 1', 'cal', { origin: [1, 1], scroll: 0, depth: DEPTH.hud });

@@ -50,16 +50,30 @@ export function speechBubble(scene: Phaser.Scene, x: number, bottomY: number, te
   g.fillRect(-1, -1, w + 2, h + 2);
   g.fillStyle(PAL.papel);
   g.fillRect(0, 0, w, h);
-  const tx = Math.floor(w / 2);
-  g.fillStyle(PAL.tinta);
-  g.fillRect(tx - 3, h + 1, 7, 1);
-  g.fillRect(tx - 2, h + 2, 5, 1);
-  g.fillRect(tx - 1, h + 3, 3, 1);
-  g.fillStyle(PAL.papel);
-  g.fillRect(tx - 2, h, 5, 1);
-  g.fillRect(tx - 1, h + 1, 3, 1);
-  g.fillRect(tx, h + 2, 1, 1);
+  // El pico va aparte para que pueda seguir apuntando al que habla aunque la caja se desplace
+  const tail = scene.add.graphics();
+  tail.fillStyle(PAL.tinta);
+  tail.fillRect(-3, h + 1, 7, 1);
+  tail.fillRect(-2, h + 2, 5, 1);
+  tail.fillRect(-1, h + 3, 3, 1);
+  tail.fillStyle(PAL.papel);
+  tail.fillRect(-2, h, 5, 1);
+  tail.fillRect(-1, h + 1, 3, 1);
+  tail.fillRect(0, h + 2, 1, 1);
   t.setPosition(padX, -1);
-  const c = scene.add.container(Math.round(x - w / 2), Math.round(bottomY - h - 4), [g, t]);
+  const c = scene.add.container(0, Math.round(bottomY - h - 4), [g, tail, t]);
+  c.setData('w', w);
+  aimBubble(c, x);
   return c;
+}
+
+/** Pone el bocadillo sobre `x` sin que se salga de la cámara; el pico sigue apuntando a `x`. */
+export function aimBubble(bubble: Phaser.GameObjects.Container, x: number) {
+  const w: number = bubble.getData('w');
+  const cam = bubble.scene.cameras.main;
+  const left = cam.scrollX + 2;
+  const right = cam.scrollX + cam.width - 2;
+  bubble.x = Math.round(Math.min(Math.max(x - w / 2, left), right - w));
+  const tail = bubble.getAt(1) as Phaser.GameObjects.Graphics;
+  tail.x = Math.min(Math.max(Math.round(x) - bubble.x, 4), w - 5);
 }

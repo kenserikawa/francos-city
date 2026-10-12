@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
-import { GAME_W, GAME_H, WORLD_W, FLOOR_Y, PLAYER, DEPTH } from '../config';
+import { GAME_W, GAME_H, WORLD_W, FLOOR_Y, PLAYER, DEPTH, IS_TOUCH } from '../config';
 import { PAL } from '../art/palette';
 import { MARUJA_X } from '../art/street';
 import { animKey } from '../art/sprites';
 import { Controls } from '../input/Controls';
+import { touch } from '../input/TouchPad';
 import { Player } from '../entities/Player';
 import { Cartel } from '../entities/Cartel';
 import { blinkOut, createFx, floatText, hitStop, shake, snap, type Fx } from '../fx/juice';
-import { label, speechBubble } from '../ui/text';
+import { aimBubble, label, speechBubble } from '../ui/text';
 import { addStreetBackdrop } from './backdrop';
 
 const BARKS = [
@@ -47,6 +48,7 @@ export class StreetScene extends Phaser.Scene {
     this.bubble = undefined;
     this.usedJump = this.usedThrow = false;
     this.controls = new Controls(this);
+    touch.setVisible(true);
     addStreetBackdrop(this);
 
     this.physics.world.setBounds(0, 0, WORLD_W, GAME_H);
@@ -83,6 +85,8 @@ export class StreetScene extends Phaser.Scene {
     this.cameras.main.fadeIn(400, 14, 11, 13);
 
     this.showStreetPlate();
+    // En móvil los botones ya dicen lo que hacen
+    if (IS_TOUCH) return;
     this.hints = label(this, GAME_W / 2, GAME_H - 3, '← → andar    Z saltar    X lanzar paquete', 'papel', {
       origin: [0.5, 1],
       scroll: 0,
@@ -163,6 +167,7 @@ export class StreetScene extends Phaser.Scene {
   private updateMaruja(time: number) {
     const dx = this.player.x - this.maruja.x;
     this.maruja.setFlipX(dx < 0);
+    if (this.bubble) aimBubble(this.bubble, this.maruja.x);
     if (Math.abs(dx) < 64 && time >= this.nextBarkAt && !this.bubble) {
       const text = BARKS[this.barkIndex++ % BARKS.length];
       this.maruja.play(animKey(this, 'maruja', 'talk'));

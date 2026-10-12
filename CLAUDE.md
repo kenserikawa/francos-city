@@ -7,11 +7,14 @@ Diseño y decisiones: `foundation-doc.md` (sección 20). Hitos: sección 19.
 
 - `npm run dev` (puerto 5173; resérvalo con `ccres`), `npm run typecheck`, `npm run build`.
 - Deploy: `.github/workflows/pages.yml` compila y publica `dist/` en GitHub Pages en cada push a `main`.
-- `?calle` salta la portada; `?debug` activa el debug de Arcade. En dev, `window.game` es la instancia.
+- `?calle` salta la portada; `?debug` activa el debug de Arcade; `?tactil` fuerza el modo móvil en escritorio. En dev, `window.game` es la instancia.
 
 ## Convenciones
 
-- Resolución lógica 320x180, escalado entero. Todo el arte a 1:1, sin rotaciones libres ni escalados no enteros.
+- Móvil (`IS_TOUCH`, puntero `coarse`): ancho lógico según la proporción de la pantalla en horizontal (hasta 432x180),
+  escalado FIT a pantalla completa y controles DOM de `src/input/TouchPad.ts`, que `Controls` lee como el teclado.
+  Usar siempre `GAME_W` (no 320) para maquetar el HUD.
+- Resolución lógica 320x180 en escritorio, escalado entero. Todo el arte a 1:1, sin rotaciones libres ni escalados no enteros.
   Sin fundidos con alfa sobre texto con sombra: usar `blinkOut`.
 - Colores siempre de `PAL` (`src/art/palette.ts`), que se lee de `art/paleta/francos-city.gpl` por nombre.
 - Texto con la fuente bitmap propia (`src/art/font.ts`, clave `FONT_KEY`); cubre acentos, ñ, ¿¡ «» € y flechas.

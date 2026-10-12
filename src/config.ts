@@ -1,6 +1,21 @@
-// Resolución lógica: todo el arte se dibuja a 1:1 sobre 320x180 y se escala por enteros.
-export const GAME_W = 320;
+const params = new URLSearchParams(location.search);
+
+/** Móvil o tablet: pantalla táctil como entrada principal. `?tactil` lo fuerza en escritorio. */
+export const IS_TOUCH = params.has('tactil') || matchMedia('(pointer: coarse)').matches;
+
+// Resolución lógica: todo el arte se dibuja a 1:1 con 180 px de alto.
+// En escritorio, 320x180 escalado por enteros. En móvil el ancho sigue la proporción de la pantalla
+// en horizontal (390x180 en un 19,5:9) para ocuparla entera; se calcula una vez, aunque se cargue en vertical.
 export const GAME_H = 180;
+export const GAME_W = IS_TOUCH ? landscapeWidth() : 320;
+
+function landscapeWidth() {
+  // La pantalla física y no la ventana: en vertical las barras del navegador falsean la proporción
+  const long = Math.max(screen.width, screen.height);
+  const short = Math.min(screen.width, screen.height);
+  const w = Math.round((GAME_H * long) / short / 2) * 2;
+  return Math.min(432, Math.max(320, w));
+}
 
 // Calle de los Francos Viejos
 export const WORLD_W = 1280;
@@ -23,7 +38,7 @@ export const PLAYER = {
   maxPackages: 3,
 };
 
-export const DEBUG = new URLSearchParams(location.search).has('debug');
+export const DEBUG = params.has('debug');
 
 export const DEPTH = {
   sky: -100,

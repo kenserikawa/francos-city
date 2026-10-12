@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { touch } from './TouchPad';
 
 export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'throw' | 'interact' | 'confirm';
 
@@ -17,7 +18,7 @@ const BINDINGS: Record<Action, number[]> = {
 
 /**
  * Acciones en vez de teclas: el resto del juego pregunta por "jump", no por la Z.
- * Aquí entrará el mando cuando toque.
+ * Junta el teclado y los controles táctiles (TouchPad); aquí entrará el mando cuando toque.
  */
 export class Controls {
   private keys = new Map<Action, Phaser.Input.Keyboard.Key[]>();
@@ -39,8 +40,8 @@ export class Controls {
     this.pressed.clear();
     for (const [action, keys] of this.keys) {
       // timeDown evita perder pulsaciones más cortas que un frame
-      if (keys.some((k) => k.timeDown > this.lastUpdate)) this.pressed.add(action);
-      if (keys.some((k) => k.isDown)) this.down.add(action);
+      if (keys.some((k) => k.timeDown > this.lastUpdate) || touch.pressedSince(action, this.lastUpdate)) this.pressed.add(action);
+      if (keys.some((k) => k.isDown) || touch.isDown(action)) this.down.add(action);
       else this.down.delete(action);
     }
     this.lastUpdate = now;
