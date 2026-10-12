@@ -26,7 +26,8 @@ Diseño y decisiones: `foundation-doc.md` (sección 20). Hitos: sección 19.
   `art/generador/personajes.py` (rejillas de letras con la paleta; `python3 art/generador/personajes.py`).
   El arte del usuario los reemplaza exportando con la misma clave; entonces no volver a ejecutar el generador.
 - Estilo de personajes: el de los secundarios de LISA. Cabeza enorme (más de la mitad de la altura),
-  cuerpo corto, piernas mínimas, manoplas redondas, nariz larga y ojos de punto, contorno negro de 1 px
-  alrededor de cada pieza (cabeza, brazos, cuerpo) y una sombra plana por material.
+  cuerpo corto, piernas como dos muñones (las de Brad), manoplas redondas, nariz larga y ojos de punto,
+  contorno negro de 1 px alrededor de cada pieza (cabeza, brazos, cuerpo) y una sombra plana por material.
+  Los dos brazos se ven siempre; en 3/4, el cercano va por delante de lo que se lleve a la espalda.
 - Textos del juego y comentarios en español.
 - Git: el remoto es la cuenta personal (`git@github.com:kenserikawa/...`); la identidad la pone `includeIf`.
