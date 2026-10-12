@@ -233,18 +233,18 @@ MOCHILA = Pieza([
     "ooooooooooo",
 ])
 
-# Brazo del fondo (derecha del torso) y brazo cercano (izquierda, por delante de la mochila)
+# Brazos: muñones como las piernas, con la punta en color piel. El del fondo va a la derecha del torso
+# y el cercano a la izquierda, por delante de la mochila.
 BRAZOS = {
-    'colgando': Pieza(["zz.", "zz.", "zz.", "Zz.", "mmm", "mmm"]),
-    'lanza': Pieza(["zzzzmm", "ZZZzmm"]),
-    'alto': Pieza(["...mm", "..zmm", ".zz..", "zz..."]),
-    'movil': Pieza(["zz", "zz", "Zz"]),
+    'colgando': Pieza(["zzz", "zzz", "zzZ", "mmm"]),
+    'lanza': Pieza(["zzzm", "zzzm", "ZZZm"]),
+    'alto': Pieza(["..mm", ".zzm", "zzz.", "zz.."]),
+    'movil': Pieza(["mzz", "mzz", "mZZ"]),
 }
 BRAZOS_CERCA = {
-    'colgando': Pieza([".zz", ".zz", ".zz", ".zZ", "mmm", "mmm"]),
-    'alto': Pieza(["mm...", "mmz..", "..zz.", "...zz"]),
+    'colgando': Pieza(["zzz", "zzz", "Zzz", "mmm"]),
+    'alto': Pieza(["mm..", "mzz.", ".zzz", "..zz"]),
 }
-MANO = Pieza(["mmm", "mmm"])
 MOVIL = Pieza(["kkk", "kxk", "kek", "kkk"], contorno=False)
 MUNON = Pieza(["hhh", "hhh", "hhh", "sss"])     # piernas: dos muñones, como los de Brad en LISA
 
@@ -269,14 +269,13 @@ def pablo(cuerpo_dy=0, cabeza_dy=0, piernas=((13, 0), (17, 0)), brazo='colgando'
     capas.append((CASCO, 7, hy - 2))
     cx, cdy = cerca_d
     if cerca == 'alto':
-        capas.append((BRAZOS_CERCA[cerca], 6 + cx, cy + 1 + cdy))
+        capas.append((BRAZOS_CERCA[cerca], 7 + cx, cy + 1 + cdy))
     else:
         capas.append((BRAZOS_CERCA[cerca], 9 + cx, cy + 3 + cdy))
     bx, by = brazo_d
-    if brazo == 'movil':
-        capas.append((BRAZOS[brazo], 19 + bx, cy + 3 + by))
-        capas.append((MOVIL, 21 + bx, cy + 3 + by))
-        capas.append((MANO, 20 + bx, cy + 6 + by))
+    if brazo == 'movil':                    # muñón doblado delante del pecho con el móvil en la punta
+        capas.append((BRAZOS[brazo], 18 + bx, cy + 4 + by))
+        capas.append((MOVIL, 16 + bx, cy + 3 + by))
     elif brazo == 'alto':
         capas.append((BRAZOS[brazo], 21 + bx, cy + 1 + by))
     else:
@@ -368,14 +367,13 @@ M_CUERPO = Pieza([
     "ZZZZZZZZZZZZZZ",
 ])
 M_BRAZOS = {
-    'colgando': Pieza(["qq.", "qq.", "qq.", "Zq.", "mmm", "mmm"]),
-    'gesto': Pieza(["qqq.mm", "Zqqmmm"]),
-    'senala': Pieza(["qqqqmmm.", "ZZZqmmmmm", "....mm..."]),
+    'colgando': Pieza(["qqq", "qqq", "qqZ", "mmm"]),
+    'gesto': Pieza(["qqqm", "qqqm", "ZZZm"]),
+    'senala': Pieza(["qqqqqm", "qqqqqm", "ZZZZZm"]),
 }
-# Brazo cercano: sale del costado izquierdo y agarra el asa del carrito
-M_BRAZO_CERCA = Pieza(["mm...", "mmqqq", "..qqZ"])
-M_PIERNA = Pieza(["uu", "uu", "uo"])
-M_ZAPATILLA = Pieza(["ZZZw", "ZZZZ"])
+# Brazo cercano: muñón que sale del costado izquierdo y se apoya en el asa del carrito
+M_BRAZO_CERCA = Pieza(["mqqq", "mqqq", "mqqZ"])
+M_MUNON = Pieza(["uuu", "uuu", "ZZZ", "ZZw"])   # muñón con media y zapatilla de estar por casa
 CARRITO = Pieza([
     "rOOrOOrO",
     "rrrrrrrr",
@@ -395,9 +393,8 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     cy = base - 3 - 10 + 1                  # arriba de la bata
     hy = cy - 16 + cabeza_dy
     capas = [(ASA, 7, cy + 2), (CARRITO, 0, cy + 4), (RUEDA, 1, base - 1), (RUEDA, 5, base - 1)]
-    for x in (14, 19):
-        capas.append((M_PIERNA, x, base - 3))
-        capas.append((M_ZAPATILLA, x, base))
+    for x in (13, 17):
+        capas.append((M_MUNON, x, base - 2))
     capas.append((M_CUERPO, 10, cy))
     capas.append((M_CABEZA, 8, hy))
     # Rulos: tres detrás y dos delante, alternando rosa y azul
@@ -405,7 +402,7 @@ def maruja(ojos='normal', boca='normal', brazo='colgando', cabeza_dy=0):
     capas += [(RULO[(i + 1) % 2], 11 + 6 * i, hy + 1) for i in range(2)]
     capas += [(p, 8, hy) for p in (M_NARIZ, M_GAFAS, M_OJOS[ojos], M_BOCA[boca])]
     capas.append((M_PENDIENTE, 10, hy + 13))
-    capas.append((M_BRAZO_CERCA, 7, cy + 1))
+    capas.append((M_BRAZO_CERCA, 7, cy + 2))
     if brazo == 'senala':
         capas.append((M_BRAZOS[brazo], 21, cy + 2))
     elif brazo == 'gesto':
